@@ -6,8 +6,18 @@ import { CourseDetailsPage } from '@/features/courses/pages/CourseDetailsPage'
 import { CategoriesPage } from '@/features/categories/pages/CategoriesPage'
 import { LawDetailPage } from '@/features/categories/pages/LawDetailPage'
 import { NotFoundPage } from '@/components/common/NotFoundPage'
+import { AdminLoginPage } from '@/features/admin/pages/AdminLoginPage'
+import { AdminDashboardPage } from '@/features/admin/pages/AdminDashboardPage'
 
 export const router = createBrowserRouter([
+  {
+    path: '/admin/login',
+    element: <AdminLoginPage />,
+  },
+  {
+    path: '/admin',
+    element: <AdminDashboardPage />,
+  },
   {
     path: '/',
     element: <MainLayout />,

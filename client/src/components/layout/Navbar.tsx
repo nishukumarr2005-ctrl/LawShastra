@@ -89,18 +89,20 @@ export function Navbar() {
               </kbd>
             </Link>
 
-            <Button variant="ghost" size="sm">
-              Log in
-            </Button>
+            <Link to="/admin/login">
+              <Button variant="ghost" size="sm" type="button">
+                Log in
+              </Button>
+            </Link>
             <Button
               variant="primary"
               size="sm"
               rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
               onClick={() => {
-                window.location.href = '/courses'
+                window.location.href = '/categories'
               }}
             >
-              Start Free Trial
+              Explore laws
             </Button>
           </div>
 
@@ -144,19 +146,21 @@ export function Navbar() {
               </NavLink>
             ))}
             <div className="pt-3 border-t border-[#EFEBE1] flex flex-col gap-2">
-              <Button variant="outline" size="md" className="w-full">
-                Log in
-              </Button>
+              <Link to="/admin/login">
+                <Button variant="outline" size="md" className="w-full" type="button">
+                  Log in
+                </Button>
+              </Link>
               <Button
                 variant="primary"
                 size="md"
                 className="w-full"
                 rightIcon={<ArrowRight className="w-4 h-4" />}
                 onClick={() => {
-                  window.location.href = '/courses'
+                  window.location.href = '/categories'
                 }}
               >
-                Start Free Trial
+                Explore laws
               </Button>
             </div>
           </div>
