@@ -4,6 +4,7 @@ import { HomePage } from '@/features/home/pages/HomePage'
 import { CoursesPage } from '@/features/courses/pages/CoursesPage'
 import { CourseDetailsPage } from '@/features/courses/pages/CourseDetailsPage'
 import { CategoriesPage } from '@/features/categories/pages/CategoriesPage'
+import { LawDetailPage } from '@/features/categories/pages/LawDetailPage'
 import { NotFoundPage } from '@/components/common/NotFoundPage'
 
 export const router = createBrowserRouter([
@@ -27,6 +28,10 @@ export const router = createBrowserRouter([
       {
         path: 'categories',
         element: <CategoriesPage />,
+      },
+      {
+        path: 'categories/:lawSlug',
+        element: <LawDetailPage />,
       },
       {
         path: '*',

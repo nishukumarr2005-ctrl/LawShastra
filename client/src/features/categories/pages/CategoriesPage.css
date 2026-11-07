@@ -1,0 +1,394 @@
+.LexQuora-archive {
+  background: #fffaf2;
+  color: #171936;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.LexQuora-wrap {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 42px 28px 70px;
+}
+
+.LexQuora-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border: 1px solid #f5d77c;
+  border-radius: 30px;
+  color: #a87800;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+  background: #fffdf7;
+}
+
+.LexQuora-intro {
+  margin: 16px 0 30px;
+}
+
+.LexQuora-intro h1 {
+  font-size: clamp(28px, 3vw, 38px);
+  letter-spacing: -1.5px;
+  margin: 0 0 9px;
+}
+
+.LexQuora-intro p {
+  margin: 0;
+  color: #77758b;
+  font-size: 15px;
+  line-height: 1.65;
+  max-width: 660px;
+}
+
+.LexQuora-layout {
+  display: grid;
+  grid-template-columns: 270px 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+.LexQuora-sidebar,
+.LexQuora-main {
+  background: #fff;
+  border: 1px solid #eee6dc;
+  border-radius: 24px;
+  box-shadow: 0 12px 35px #57401a08;
+}
+
+.LexQuora-sidebar {
+  padding: 24px;
+  position: sticky;
+  top: 104px;
+  overflow: hidden;
+}
+
+.LexQuora-side-title {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee6dc;
+  font-size: 21px;
+  font-weight: 750;
+}
+
+.LexQuora-side-icon,
+.LexQuora-card-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 15px;
+  background: #fff3ca;
+  display: grid;
+  place-items: center;
+  font-size: 23px;
+}
+
+.LexQuora-side-list {
+  padding-top: 9px;
+}
+
+.LexQuora-side-list a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 4px;
+  border-bottom: 1px solid #f2ede7;
+  color: #25233d;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.LexQuora-side-list a:hover {
+  color: #6738e8;
+}
+
+.LexQuora-side-list small {
+  color: #9a94a8;
+  font-size: 18px;
+}
+
+.LexQuora-side-note {
+  margin-top: 22px;
+  padding: 15px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #fff8e7, #fff);
+  font-size: 12px;
+  color: #898092;
+  line-height: 1.6;
+}
+
+.LexQuora-main {
+  padding: 26px;
+}
+
+.LexQuora-section-head {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+.LexQuora-section-head:before,
+.LexQuora-section-head:after {
+  content: "";
+  height: 1px;
+  background: #e8dfd4;
+  flex: 1;
+}
+
+.LexQuora-section-pill {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 24px;
+  border: 1px solid #f4ca48;
+  border-radius: 30px;
+  background: linear-gradient(180deg, #fff9e8, #fff1c6);
+  font-size: 23px;
+  font-weight: 800;
+}
+
+.LexQuora-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.LexQuora-card {
+  position: relative;
+  z-index: 1;
+  border: 1px solid #eee6dc;
+  border-radius: 19px;
+  background: #fff;
+  padding: 22px;
+  min-height: 164px;
+  transition: 0.2s ease;
+  outline: none;
+  cursor: pointer;
+  overflow: visible;
+}
+
+.LexQuora-card:hover,
+.LexQuora-card:focus-within,
+.LexQuora-card.open {
+  z-index: 5;
+  border-color: #c7b4ff;
+  box-shadow: 0 12px 28px #6a42db12;
+  transform: translateY(-2px);
+  margin-bottom: 140px;
+}
+
+.LexQuora-card-top {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.LexQuora-card-icon {
+  background: #f3edff;
+  color: #6738e8;
+  font-size: 22px;
+}
+
+.LexQuora-card:nth-child(2) .LexQuora-card-icon {
+  background: #f3f1f8;
+  color: #625c7b;
+}
+
+.LexQuora-card:nth-child(3) .LexQuora-card-icon {
+  background: #fff1e9;
+  color: #e77939;
+}
+
+.LexQuora-card:nth-child(4) .LexQuora-card-icon {
+  background: #eef8f0;
+  color: #398b5c;
+}
+
+.LexQuora-name {
+  font-size: 21px;
+  font-weight: 750;
+  letter-spacing: -0.4px;
+}
+
+.LexQuora-desc {
+  font-size: 13px;
+  color: #77758b;
+  margin: 12px 0 0 61px;
+  line-height: 1.55;
+}
+
+.LexQuora-hint {
+  font-size: 11px;
+  color: #a19bad;
+  margin: 11px 0 0 61px;
+}
+
+.LexQuora-submenu {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  top: calc(100% + 12px);
+  z-index: 10;
+  background: #fff;
+  border: 1px solid #e9defe;
+  border-radius: 16px;
+  padding: 9px;
+  box-shadow: 0 18px 35px #29204420;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-7px);
+  transition: 0.18s ease;
+}
+
+.LexQuora-card:hover .LexQuora-submenu,
+.LexQuora-card:focus-within .LexQuora-submenu,
+.LexQuora-card.open .LexQuora-submenu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.LexQuora-submenu a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 12px;
+  border-radius: 11px;
+  text-decoration: none;
+  color: #35314c;
+  background: #faf8ff;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.LexQuora-submenu a:hover {
+  background: #f3edff;
+  color: #6738e8;
+}
+
+.LexQuora-submenu a span {
+  color: #a69abf;
+}
+
+.LexQuora-strip {
+  margin-top: 20px;
+  border: 1px dashed #e8d9c7;
+  border-radius: 17px;
+  padding: 17px 19px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  background: #fffdf9;
+}
+
+.LexQuora-strip strong {
+  font-size: 16px;
+}
+
+.LexQuora-strip p {
+  margin: 4px 0 0;
+  color: #77758b;
+  font-size: 12px;
+}
+
+.LexQuora-link {
+  white-space: nowrap;
+  text-decoration: none;
+  color: #5d35d8;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.LexQuora-tip {
+  margin-top: 17px;
+  color: #8e8998;
+  font-size: 12px;
+  text-align: center;
+}
+
+.LexQuora-mobile-tip {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .LexQuora-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .LexQuora-sidebar {
+    position: static;
+  }
+
+  .LexQuora-side-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: 18px;
+  }
+
+  .LexQuora-main {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .LexQuora-wrap {
+    padding: 28px 15px 48px;
+  }
+
+  .LexQuora-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .LexQuora-main {
+    padding: 16px;
+  }
+
+  .LexQuora-section-pill {
+    font-size: 19px;
+    padding: 9px 17px;
+  }
+
+  .LexQuora-card {
+    min-height: 150px;
+  }
+
+  .LexQuora-submenu {
+    grid-template-columns: 1fr;
+    position: relative;
+    left: auto;
+    right: auto;
+    top: auto;
+    margin-top: 14px;
+    display: none;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+
+  .LexQuora-card.open .LexQuora-submenu {
+    display: grid;
+  }
+
+  .LexQuora-mobile-tip {
+    display: block;
+    font-size: 11px;
+    color: #9b94a5;
+    margin-top: 6px;
+  }
+
+  .LexQuora-hint {
+    display: none;
+  }
+
+  .LexQuora-strip {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

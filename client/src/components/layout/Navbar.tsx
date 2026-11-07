@@ -21,10 +21,13 @@ export function Navbar() {
 
 
   const navLinks = [
-    { label: 'Explore Courses', href: '/courses', icon: BookOpen },
-    { label: 'Categories', href: '/categories', icon: Compass },
-    { label: 'Instructors', href: '/#instructors', icon: Award },
-    { label: 'Why EduSphere', href: '/#why-us' },
+    { label: 'Home', href: '/home', icon: BookOpen },
+    { label: 'Bare Acts', href: '/categories', icon: Compass },
+    { label: 'Case Laws', href: '/#instructors', icon: Award },
+    { label: 'Question Bank', href: '/#why-us' },
+    { label: 'About Us', href: '/#why-us' },
+    { label: 'Contact', href: '/#why-us' },
+
   ]
 
   return (
@@ -36,7 +39,7 @@ export function Navbar() {
           : 'bg-[#FFFDF8] border-b border-[#F5F2EA] py-5'
       )}
     >
-      <Container>
+      <Container size="full" className="max-w-none">
         <div className="flex items-center justify-between gap-6">
           {/* Brand Logo */}
           <Link to="/" className="flex items-center gap-2.5 group">
@@ -45,7 +48,7 @@ export function Navbar() {
             </div>
             <div className="flex flex-col">
               <span className="text-xl font-extrabold tracking-tight text-[#25232B]">
-                Law<span className="text-[#FF8A45]">Shatra</span>
+                <span className="text-[#25232B]">Lex</span><span className="text-[#FF8A45]">Quora</span>
               </span>
               <span className="text-[10px] font-bold text-[#77747F] uppercase tracking-wider -mt-1">
                 Learn Without Limits
