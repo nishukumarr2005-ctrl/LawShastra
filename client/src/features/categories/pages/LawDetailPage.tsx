@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { getLaws } from '@/services/lawService'
 
 type LawSection = {
   number: string
@@ -286,6 +287,11 @@ const lawDetails: LawDetail[] = [
 
 const slugify = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
+const normalizeLawSlug = (value: string) => {
+  const slug = slugify(value)
+  return slug.replace(/-(?:19|20)\d{2}$/, '')
+}
+
 type WorkspaceTab =
   | 'bare-act-search'
   | 'orders-rules'
@@ -302,8 +308,58 @@ export function LawDetailPage() {
   const [selectedChapter, setSelectedChapter] = useState<LawChapter | null>(null)
   const [activeWorkspaceTab, setActiveWorkspaceTab] = useState<WorkspaceTab>('bare-act-search')
   const [modalSection, setModalSection] = useState<LawSection | null>(null)
+  const [apiLaws, setApiLaws] = useState<Array<{ title: string; slug: string; subcategories: string[] }>>([])
 
-  const law = lawDetails.find((item) => item.slug === lawSlug || slugify(item.title) === lawSlug)
+  const normalizedLawSlug = lawSlug ? normalizeLawSlug(lawSlug) : ''
+  const law = lawDetails.find((item) => {
+    const aliases = new Set([
+      item.slug,
+      slugify(item.title),
+      normalizeLawSlug(item.slug),
+      normalizeLawSlug(item.title),
+      normalizedLawSlug,
+    ])
+
+    return aliases.has(lawSlug ?? '') || aliases.has(normalizedLawSlug)
+  })
+
+  useEffect(() => {
+    let isMounted = true
+
+    const loadLaws = async () => {
+      try {
+        const laws = await getLaws()
+        if (!isMounted) return
+
+        const mapped = laws.map((item) => ({
+          title: item.title,
+          slug: item.slug || slugify(item.title),
+          subcategories: Array.isArray(item.subcategories) && item.subcategories.length > 0 ? item.subcategories : item.subcategory ? [item.subcategory] : [],
+        }))
+
+        setApiLaws(mapped.length > 0 ? mapped : lawDetails.map((item) => ({
+          title: item.title,
+          slug: item.slug,
+          subcategories: item.quickLinks.slice(0, 4),
+        })))
+      } catch {
+        if (!isMounted) return
+        setApiLaws(
+          lawDetails.map((item) => ({
+            title: item.title,
+            slug: item.slug,
+            subcategories: item.quickLinks.slice(0, 4),
+          }))
+        )
+      }
+    }
+
+    void loadLaws()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   useEffect(() => {
     if (!law) return
@@ -423,12 +479,42 @@ export function LawDetailPage() {
 
         <div className="grid gap-[20px] xl:grid-cols-[280px_minmax(0,1fr)]">
           <aside className="rounded-[20px] border border-[#EEE6DC] bg-[#F7F2EA] p-[18px] shadow-[0_10px_24px_rgba(48,35,18,0.03)] xl:sticky xl:top-[94px] xl:h-fit">
-            <div className="flex items-center gap-[10px] border-b border-[#E7DED1] pb-[15px] text-[15px] font-extrabold text-[#171936]">
-              <div className="grid h-[36px] w-[36px] place-items-center rounded-[11px] bg-[#F6D98E] text-[18px] shadow-inner shadow-white/60">📚</div>
-              <span>{law.shortTitle} Workspace</span>
+            <div className="rounded-[16px] border border-[#E9DECA] bg-[#F8F3E9] p-[12px]">
+              <div className="flex items-center gap-[10px] pb-[10px] text-[15px] font-extrabold text-[#171936]">
+                <div className="grid h-[36px] w-[36px] place-items-center rounded-[11px] bg-[#F6D98E] text-[18px] shadow-inner shadow-white/60">📚</div>
+                <span>Base Acts</span>
+              </div>
+
+              <div className="space-y-2">
+                {apiLaws.map((item) => (
+                  <div key={item.slug} className="rounded-[12px] border border-[#F0E8DC] bg-white px-[10px] py-[8px]">
+                    <Link
+                      to={`/categories/${item.slug}`}
+                      className="flex items-center justify-between gap-3 text-left text-[15px] font-bold text-[#171936] transition-colors hover:text-[#5F42D9]"
+                    >
+                      <span>{item.title}</span>
+                      <span className="text-[18px] text-[#A59AAE]">›</span>
+                    </Link>
+
+                    {item.subcategories.length > 0 && (
+                      <div className="mt-2 space-y-1 border-t border-[#F1E8DD] pt-2">
+                        {item.subcategories.slice(0, 4).map((subcategory) => (
+                          <Link
+                            key={`${item.slug}-${subcategory}`}
+                            to={`/categories/${item.slug}`}
+                            className="block text-[11px] font-medium text-[#625E73] transition-colors hover:text-[#171936]"
+                          >
+                            {subcategory}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <nav className="mt-[12px] grid gap-[6px]">
+            <nav className="mt-[18px] grid gap-[6px]">
               {workspaceTabs.map((item) => (
                 <button
                   key={item.key}

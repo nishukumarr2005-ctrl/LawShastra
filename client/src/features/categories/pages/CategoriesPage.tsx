@@ -1,12 +1,13 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { getCategories, getLaws } from '@/services/lawService'
 
 type LawMenuItem = {
   label: string
   slug: string
 }
 
-const lawSections: Array<{
+const fallbackLawSections: Array<{
   name: string
   icon: string
   description: string
@@ -78,12 +79,66 @@ const lawSections: Array<{
 
 export function CategoriesPage() {
   const navigate = useNavigate()
-  const [openCard, setOpenCard] = useState<number | null>(null)
+  const [openCard, setOpenCard] = useState<number | null>(0)
+  const [lawSections, setLawSections] = useState(fallbackLawSections)
+  const [baseActs, setBaseActs] = useState<LawMenuItem[]>([])
+
+  useEffect(() => {
+    const handlePointerDown = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null
+      if (!target?.closest('[data-category-card]')) {
+        setOpenCard(null)
+      }
+    }
+
+    document.addEventListener('mousedown', handlePointerDown)
+    return () => document.removeEventListener('mousedown', handlePointerDown)
+  }, [])
+
+  useEffect(() => {
+    const fetchLawCatalog = async () => {
+      try {
+        const [categories, laws] = await Promise.all([getCategories(), getLaws()])
+        if (!categories.length || !laws.length) {
+          const fallbackActs = fallbackLawSections.flatMap((section) => section.submenu).slice(0, 6)
+          setBaseActs(fallbackActs)
+          return
+        }
+
+        const mappedSections = categories.map((category, index) => ({
+          name: category.name,
+          icon: ['🏛', '🛡', '🏦', '📑'][index % 4],
+          description: category.name === 'Civil Law' ? 'Private rights, civil disputes, property, contracts and remedies.' : category.name === 'Criminal Law' ? 'Offences, criminal procedure, evidence and the justice system.' : category.name === 'Banking Law' ? 'Banking regulation, recovery, secured assets and financial institutions.' : 'Special statutes and important legislation across legal practice areas.',
+          hint: 'Explore legal subjects',
+          submenu: laws
+            .filter((law) => law.category === category.name)
+            .map((law) => ({
+              label: law.title,
+              slug: law.slug || law.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+            })),
+          accent: ['bg-[#F1ECFF] text-[#5F42D9]', 'bg-[#F5F3F9] text-[#544B6E]', 'bg-[#FFF1E8] text-[#DE7D4C]', 'bg-[#EAF8EF] text-[#3E8E62]'][index % 4],
+        }))
+
+        const lawList = laws
+          .filter((law) => law.title)
+          .map((law) => ({
+            label: law.title,
+            slug: law.slug || law.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+          }))
+
+        setLawSections(mappedSections.length ? mappedSections : fallbackLawSections)
+        setBaseActs(lawList.length ? lawList.slice(0, 8) : fallbackLawSections.flatMap((section) => section.submenu).slice(0, 8))
+      } catch {
+        setLawSections(fallbackLawSections)
+        setBaseActs(fallbackLawSections.flatMap((section) => section.submenu).slice(0, 8))
+      }
+    }
+
+    void fetchLawCatalog()
+  }, [])
 
   const handleCardToggle = (index: number) => {
-    if (window.innerWidth <= 640) {
-      setOpenCard((current) => (current === index ? null : index))
-    }
+    setOpenCard((current) => (current === index ? null : index))
   }
 
   const handleCardKeyDown = (event: React.KeyboardEvent<HTMLElement>, index: number) => {
@@ -120,15 +175,16 @@ export function CategoriesPage() {
             </div>
 
             <div className="mt-4 space-y-1">
-              {['Constitution of India', 'BNS', 'BNSS', 'BSA'].map((item) => (
-                <a
-                  key={item}
-                  href="#"
-                  className="flex items-center justify-between rounded-xl px-2 py-3 text-[15px] font-semibold text-[#25233D] transition-colors hover:text-[#5F42D9]"
+              {baseActs.map((item) => (
+                <button
+                  key={item.slug}
+                  type="button"
+                  onClick={() => handleSubmenuClick(item.slug)}
+                  className="flex w-full items-center justify-between rounded-xl px-2 py-3 text-left text-[15px] font-semibold text-[#25233D] transition-colors hover:text-[#5F42D9]"
                 >
-                  <span>{item}</span>
+                  <span>{item.label}</span>
                   <small className="text-lg text-[#A09AA9]">›</small>
-                </a>
+                </button>
               ))}
             </div>
 
@@ -154,12 +210,11 @@ export function CategoriesPage() {
                   <article
                     key={section.name}
                     tabIndex={0}
-                    onMouseEnter={() => setOpenCard(index)}
-                    onMouseLeave={() => setOpenCard((current) => (current === index ? null : current))}
+                    data-category-card
                     onClick={() => handleCardToggle(index)}
                     onKeyDown={(event) => handleCardKeyDown(event, index)}
                     className={[
-                      'group relative z-10 overflow-visible rounded-[22px] border border-[#EEE4D9] bg-white p-5 transition-all duration-200 ease-out cursor-pointer outline-none',
+                      'group relative z-10 overflow-visible rounded-[22px] border border-[#EEE4D9] bg-white p-5 pb-6 transition-all duration-200 ease-out cursor-pointer outline-none',
                       'hover:border-[#D8CBFF] hover:z-20 hover:shadow-[0_18px_35px_rgba(108,74,221,0.08)]',
                       isOpen ? 'z-20 border-[#D8CBFF] shadow-[0_18px_35px_rgba(108,74,221,0.08)]' : '',
                     ].join(' ')}
@@ -178,7 +233,7 @@ export function CategoriesPage() {
 
                     <div
                       className={[
-                        'absolute left-4 right-4 top-[calc(100%+10px)] z-50 grid gap-2 rounded-[18px] border border-[#E9DFFE] bg-[#FAF7FF] p-2.5 shadow-[0_18px_40px_rgba(41,32,68,0.14)] transition-all duration-200',
+                        'absolute left-4 right-4 top-[calc(100%+12px)] z-50 grid max-h-[300px] gap-2 overflow-auto rounded-[18px] border border-[#E9DFFE] bg-[#F9F5FF] p-2.5 shadow-[0_18px_40px_rgba(41,32,68,0.14)] transition-all duration-200',
                         'sm:grid-cols-2',
                         'pointer-events-none opacity-0 translate-y-[-8px]',
                         isOpen ? 'pointer-events-auto opacity-100 translate-y-0' : '',
@@ -193,7 +248,7 @@ export function CategoriesPage() {
                             event.stopPropagation()
                             handleSubmenuClick(item.slug)
                           }}
-                          className="flex items-center justify-between rounded-xl bg-[#FAF7FF] px-3 py-2.5 text-left text-[12px] font-bold text-[#34314C] transition-colors hover:bg-[#F2EBFF] hover:text-[#5F42D9]"
+                          className="flex min-h-[46px] items-center justify-between rounded-xl border border-[#EEE6FF] bg-white px-3 py-2.5 text-left text-[12px] font-bold text-[#34314C] shadow-[0_8px_18px_rgba(91,70,165,0.04)] transition-all hover:border-[#D8C7FF] hover:bg-[#F2EBFF] hover:text-[#5F42D9]"
                         >
                           <span>{item.label}</span>
                           <span className="text-[#A69ABF]">›</span>

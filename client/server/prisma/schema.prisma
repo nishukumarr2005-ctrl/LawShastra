@@ -1,0 +1,138 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  EDITOR
+  USER
+}
+
+enum ContentStatus {
+  DRAFT
+  REVIEW
+  PUBLISHED
+}
+
+enum CategoryStatus {
+  LIVE
+  DRAFT
+}
+
+enum CourseLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  name          String
+  email         String    @unique
+  passwordHash  String
+  role          UserRole  @default(USER)
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  refreshTokens RefreshToken[]
+  auditLogs     AuditLog[]
+}
+
+model RefreshToken {
+  id          Int      @id @default(autoincrement())
+  token       String   @unique
+  userId      Int
+  expiresAt   DateTime
+  revoked     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Category {
+  id          Int            @id @default(autoincrement())
+  name        String         @unique
+  slug        String         @unique
+  description String?
+  status      CategoryStatus @default(LIVE)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  laws        Law[]
+}
+
+model Law {
+  id                  Int            @id @default(autoincrement())
+  title               String
+  shortTitle          String?
+  subcategoryShortName String?
+  slug                String         @unique
+  categoryId          Int
+  category            Category       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  jurisdiction        String         @default("India")
+  summary             String
+  sourceUrl           String?
+  sourceLabel         String?
+  status              ContentStatus  @default(DRAFT)
+  pdfUrl              String?
+  pdfExtractedText    String?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  subcategories       Subcategory[]
+  chapters            Chapter[]
+}
+
+model Subcategory {
+  id        Int      @id @default(autoincrement())
+  name      String
+  lawId     Int
+  law       Law      @relation(fields: [lawId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([lawId, name])
+}
+
+model Chapter {
+  id        Int      @id @default(autoincrement())
+  lawId     Int
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  law       Law      @relation(fields: [lawId], references: [id], onDelete: Cascade)
+}
+
+model Course {
+  id          Int          @id @default(autoincrement())
+  title       String
+  category    String
+  level       CourseLevel  @default(BEGINNER)
+  duration    String
+  status      ContentStatus @default(DRAFT)
+  summary     String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  action    String
+  entity    String
+  entityId  Int?
+  details   String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model ApiKey {
+  id        Int      @id @default(autoincrement())
+  name      String
+  keyHash   String   @unique
+  createdAt DateTime @default(now())
+  revoked   Boolean  @default(false)
+}
