@@ -39,14 +39,27 @@ export interface AdminArticle {
   updatedAt: string
 }
 
+export interface AdminLawChapter {
+  id?: number
+  title: string
+  content: string
+}
+
 export interface AdminLegalResource {
   id: number
   title: string
+  shortTitle?: string
+  slug?: string
   category: string
   jurisdiction: string
   status: ContentStatus
   summary: string
-  slug?: string
+  sourceUrl?: string
+  sourceLabel?: string
+  pdfUrl?: string
+  pdfExtractedText?: string
+  subcategories: string[]
+  chapters: AdminLawChapter[]
 }
 
 export interface AdminPage {
@@ -298,12 +311,21 @@ const mapCategory = (c: any): AdminCategory => ({
 
 const mapLaw = (l: any): AdminLegalResource => ({
   id: l.id,
-  title: l.title,
+  title: l.title || '',
+  shortTitle: l.shortTitle || '',
+  slug: l.slug || '',
   category: l.category || 'Civil Law',
   jurisdiction: l.jurisdiction || 'India',
   status: (l.status || 'Draft') as ContentStatus,
   summary: l.summary || '',
-  slug: l.slug,
+  sourceUrl: l.sourceUrl || '',
+  sourceLabel: l.sourceLabel || '',
+  pdfUrl: l.pdfUrl || '',
+  pdfExtractedText: l.pdfExtractedText || '',
+  subcategories: Array.isArray(l.subcategories) ? l.subcategories : l.subcategory ? [l.subcategory] : [],
+  chapters: Array.isArray(l.chapters)
+    ? l.chapters.map((c: any) => ({ id: c.id, title: c.title || '', content: c.content || '' }))
+    : [],
 })
 
 const mapUser = (u: any): AdminUser => ({
@@ -459,7 +481,23 @@ export const adminActions = {
 
   // Legal resources
   async saveLegalResource(input: Partial<AdminLegalResource> & { id?: number }) {
-    const payload = { title: input.title || 'Untitled Resource', category: input.category || 'Civil Law', jurisdiction: input.jurisdiction || 'India', status: input.status || 'Draft', summary: input.summary || '' }
+    const payload = {
+      title: input.title || 'Untitled Resource',
+      shortTitle: input.shortTitle || '',
+      slug: input.slug || undefined,
+      category: input.category || 'Civil Law',
+      jurisdiction: input.jurisdiction || 'India',
+      status: input.status || 'Draft',
+      summary: input.summary || '',
+      sourceUrl: input.sourceUrl || '',
+      sourceLabel: input.sourceLabel || '',
+      pdfUrl: input.pdfUrl || '',
+      pdfExtractedText: input.pdfExtractedText || '',
+      subcategories: Array.isArray(input.subcategories) ? input.subcategories.filter(Boolean) : [],
+      chapters: Array.isArray(input.chapters)
+        ? input.chapters.map((c) => ({ title: c.title || 'Untitled chapter', content: c.content || '' }))
+        : [],
+    }
     try {
       if (input.id) {
         const saved = await api.updateLegalResource(input.id, payload)
@@ -470,7 +508,12 @@ export const adminActions = {
       }
       log(input.id ? 'Updated legal resource' : 'Created legal resource', payload.title, 'success')
     } catch {
-      const item = { id: input.id || uid(), ...payload } as AdminLegalResource
+      const item = {
+        id: input.id || uid(),
+        ...payload,
+        slug: input.slug || '',
+        chapters: (payload.chapters || []).map((c, i) => ({ id: -(i + 1), ...c })),
+      } as AdminLegalResource
       setState((p) => ({ ...p, legalResources: input.id ? p.legalResources.map((r) => (r.id === input.id ? item : r)) : [item, ...p.legalResources] }))
       log('Saved resource (local)', payload.title, 'warning')
     }

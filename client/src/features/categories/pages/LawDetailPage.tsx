@@ -2,7 +2,7 @@
 import { Link, useParams } from 'react-router-dom'
 import { getLawBySlug, getLaws, type LawApiItem } from '@/services/lawService'
 
-type ApiChapter = { id: number; title: string; content: string }
+type ApiChapter = { id?: number; title: string; content: string }
 
 export function LawDetailPage() {
   const { lawSlug } = useParams<{ lawSlug: string }>()
@@ -182,14 +182,14 @@ export function LawDetailPage() {
               ) : (
                 <div className="grid gap-0 overflow-hidden rounded-[18px] border border-[#E7E2DB] bg-[#F5F1EE]">
                   {filtered.map((ch, idx) => {
-                    const displayIndex = chapters.findIndex((c) => c.id === ch.id)
+                    const displayIndex = chapters.findIndex((c) => c === ch)
                     const labelNo = displayIndex >= 0 ? displayIndex + 1 : idx + 1
-                    const isOpen = openChapter === ch.id
+                    const isOpen = openChapter === (ch.id ?? idx)
                     return (
-                      <div key={ch.id} className="border-b border-[#E7E2DB] last:border-b-0">
+                      <div key={ch.id ?? idx} className="border-b border-[#E7E2DB] last:border-b-0">
                         <button
                           type="button"
-                          onClick={() => setOpenChapter(isOpen ? null : ch.id)}
+                          onClick={() => setOpenChapter(isOpen ? null : (ch.id ?? idx))}
                           className="flex w-full items-center justify-between bg-[#F2F0EE] px-[18px] py-[18px] text-left transition-colors hover:bg-[#EFEAE7]"
                         >
                           <div className="min-w-0 pr-4">
@@ -203,7 +203,11 @@ export function LawDetailPage() {
                         {isOpen && (
                           <div className="border-t border-[#E7E2DB] bg-[#FFFCF8] px-[18px] py-[16px]">
                             {ch.content ? (
-                              <div className="whitespace-pre-wrap text-[14px] leading-[1.8] text-[#3F3B48]">{ch.content}</div>
+                              /<\/?[a-z][\s\S]*>/i.test(ch.content) ? (
+                                <div className="law-rich text-[14px] leading-[1.8] text-[#3F3B48]" dangerouslySetInnerHTML={{ __html: ch.content }} />
+                              ) : (
+                                <div className="whitespace-pre-wrap text-[14px] leading-[1.8] text-[#3F3B48]">{ch.content}</div>
+                              )
                             ) : (
                               <div className="text-[13px] text-[#77758B]">No content added for this chapter yet.</div>
                             )}
@@ -218,6 +222,26 @@ export function LawDetailPage() {
           </div>
         </div>
       </main>
+      <style>{`
+        .law-rich p { margin: 0.6em 0; }
+        .law-rich h1 { font-size: 1.5em; font-weight: 700; margin: 0.8em 0 0.4em; }
+        .law-rich h2 { font-size: 1.3em; font-weight: 700; margin: 0.7em 0 0.35em; }
+        .law-rich h3 { font-size: 1.15em; font-weight: 700; margin: 0.6em 0 0.3em; }
+        .law-rich h4,.law-rich h5,.law-rich h6 { font-weight: 700; margin: 0.5em 0 0.25em; }
+        .law-rich ul { list-style: disc; padding-left: 1.5em; margin: 0.5em 0; }
+        .law-rich ol { list-style: decimal; padding-left: 1.5em; margin: 0.5em 0; }
+        .law-rich blockquote { border-left: 3px solid #D8CBB8; padding-left: 0.9em; color: #5B586A; margin: 0.6em 0; }
+        .law-rich pre { background: #171936; color: #f8f5ee; border-radius: 0.5rem; padding: 0.75em 1em; overflow-x: auto; margin: 0.6em 0; }
+        .law-rich code { background: #EFE8DD; border-radius: 0.25rem; padding: 0.1em 0.35em; font-size: 0.9em; }
+        .law-rich pre code { background: transparent; padding: 0; }
+        .law-rich hr { border: 0; border-top: 1px solid #E7E2DB; margin: 1em 0; }
+        .law-rich a { color: #5F42D9; text-decoration: underline; }
+        .law-rich img { max-width: 100%; height: auto; border-radius: 0.5rem; margin: 0.5em 0; }
+        .law-rich mark { background: #fde68a; padding: 0.05em 0.15em; border-radius: 0.15rem; }
+        .law-rich table { border-collapse: collapse; width: 100%; margin: 0.6em 0; }
+        .law-rich th, .law-rich td { border: 1px solid #E7E2DB; padding: 0.4em 0.6em; vertical-align: top; }
+        .law-rich th { background: #F7F2EA; font-weight: 600; text-align: left; }
+      `}</style>
     </div>
   )
 }

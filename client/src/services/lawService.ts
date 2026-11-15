@@ -1,16 +1,21 @@
 import { apiRequest } from './apiClient'
 
+export type LawChapterItem = { id?: number; title: string; content: string }
+
 export type LawApiItem = {
   id: number
   title: string
+  shortTitle?: string
   category: string
   subcategory: string
   subcategoryShortName?: string
   subcategories: string[]
-  chapters: Array<{ id: number; title: string; content: string }>
+  chapters: LawChapterItem[]
   jurisdiction: string
   status: 'Published' | 'Review' | 'Draft'
   summary: string
+  sourceUrl?: string
+  sourceLabel?: string
   pdfUrl: string
   pdfExtractedText: string
   slug?: string
@@ -35,6 +40,8 @@ export type CourseApiItem = {
 
 export type CreateLawPayload = {
   title: string
+  shortTitle?: string
+  slug?: string
   category?: string
   subcategory?: string
   subcategoryShortName?: string
@@ -43,6 +50,8 @@ export type CreateLawPayload = {
   jurisdiction?: string
   status?: 'Published' | 'Review' | 'Draft'
   summary?: string
+  sourceUrl?: string
+  sourceLabel?: string
   pdfUrl?: string
   pdfExtractedText?: string
 }
