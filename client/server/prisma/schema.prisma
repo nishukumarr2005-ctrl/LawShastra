@@ -136,3 +136,216 @@ model ApiKey {
   createdAt DateTime @default(now())
   revoked   Boolean  @default(false)
 }
+
+enum PublishStatus {
+  Draft
+  Review
+  Published
+}
+
+enum BannerStatus {
+  Active
+  Scheduled
+  Hidden
+}
+
+enum MenuLocation {
+  Header
+  Footer
+  Sidebar
+}
+
+enum NotificationChannel {
+  In_App
+  Email
+}
+
+enum BackupStatus {
+  Completed
+  Running
+  Failed
+}
+
+enum ActivityLevel {
+  info
+  warning
+  success
+}
+
+enum CmsSubcategoryStatus {
+  Published
+  Draft
+}
+
+model CmsSubcategory {
+  id         Int                  @id @default(autoincrement())
+  name       String
+  slug       String
+  categoryId Int?
+  status     CmsSubcategoryStatus @default(Draft)
+  createdAt  DateTime             @default(now())
+  updatedAt  DateTime             @updatedAt
+}
+
+model Article {
+  id         Int           @id @default(autoincrement())
+  title      String
+  slug       String        @unique
+  categoryId Int?
+  excerpt    String?
+  content    String?
+  status     PublishStatus @default(Draft)
+  author     String?
+  tags       String[]      @default([])
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+}
+
+model Page {
+  id        Int           @id @default(autoincrement())
+  title     String
+  slug      String        @unique
+  status    PublishStatus @default(Draft)
+  template  String        @default("Standard")
+  content   String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model Media {
+  id        Int      @id @default(autoincrement())
+  name      String
+  type      String
+  url       String
+  size      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Tag {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  slug      String   @unique
+  usage     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model HomepageBlock {
+  id        Int      @id @default(autoincrement())
+  title     String
+  type      String
+  enabled   Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Banner {
+  id        Int          @id @default(autoincrement())
+  title     String
+  location  String
+  status    BannerStatus @default(Active)
+  link      String?
+  image     String?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model MenuItem {
+  id        Int          @id @default(autoincrement())
+  label     String
+  path      String
+  location  MenuLocation @default(Header)
+  visible   Boolean      @default(true)
+  order     Int          @default(0)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model VisibilityRule {
+  id        Int      @id @default(autoincrement())
+  component String
+  desktop   Boolean  @default(true)
+  tablet    Boolean  @default(true)
+  mobile    Boolean  @default(true)
+  note      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SeoEntry {
+  id          Int      @id @default(autoincrement())
+  path        String   @unique
+  title       String?
+  description String?
+  noindex     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AdminRole {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  permissions String[] @default([])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model FeatureFlag {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique
+  label       String
+  enabled     Boolean  @default(false)
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SiteSetting {
+  id              Int      @id @default(1)
+  siteName        String   @default("LawShastra")
+  tagline         String?
+  supportEmail    String?
+  contactPhone    String?
+  maintenanceMode Boolean  @default(false)
+  defaultTheme    String   @default("Light")
+  updatedAt       DateTime @updatedAt
+}
+
+model AdminActivityLog {
+  id        Int           @id @default(autoincrement())
+  actor     String?
+  action    String
+  target    String?
+  level     ActivityLevel @default(info)
+  createdAt DateTime      @default(now())
+}
+
+model Notification {
+  id        Int                 @id @default(autoincrement())
+  title     String
+  message   String
+  channel   NotificationChannel @default(In_App)
+  read      Boolean             @default(false)
+  createdAt DateTime            @default(now())
+}
+
+model Backup {
+  id        Int          @id @default(autoincrement())
+  label     String
+  size      String?
+  status    BackupStatus @default(Completed)
+  createdAt DateTime     @default(now())
+}
+
+model MaintenanceTask {
+  id        Int       @id @default(autoincrement())
+  name      String
+  schedule  String?
+  lastRun   DateTime?
+  enabled   Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}

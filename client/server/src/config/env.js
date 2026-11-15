@@ -16,3 +16,7 @@ export const env = {
   rateLimitWindowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 900000),
   rateLimitMaxRequests: Number(process.env.RATE_LIMIT_MAX_REQUESTS || 100),
 }
+
+if (!process.env.DATABASE_URL) {
+  process.env.DATABASE_URL = env.databaseUrl
+}

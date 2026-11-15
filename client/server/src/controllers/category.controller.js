@@ -1,5 +1,12 @@
 import { sendError, sendSuccess } from '../utils/response.js'
-import { createCategory, deleteCategory, getAllCategories, getCategoryById, updateCategory } from '../services/category.service.js'
+import {
+  createCategory,
+  deleteCategory,
+  getAllCategories,
+  getCategoryById,
+  updateCategory,
+  getPublicCategories,
+} from '../services/category.service.js'
 
 export const getCategories = async (req, res, next) => {
   try {
@@ -29,7 +36,7 @@ export const createCategoryController = async (req, res, next) => {
     const category = await createCategory(req.body || {})
     return sendSuccess(res, 'Category created successfully', category, 201)
   } catch (error) {
-    return next(error)
+    return sendError(res, error.message, [], 400)
   }
 }
 
@@ -41,18 +48,23 @@ export const updateCategoryController = async (req, res, next) => {
     }
     return sendSuccess(res, 'Category updated successfully', category)
   } catch (error) {
-    return next(error)
+    return sendError(res, error.message, [], 400)
   }
 }
 
 export const deleteCategoryController = async (req, res, next) => {
   try {
-    const existing = await getCategoryById(req.params.id)
-    if (!existing) {
-      return sendError(res, 'Category not found', [], 404)
-    }
     await deleteCategory(req.params.id)
     return sendSuccess(res, 'Category deleted successfully', { id: Number(req.params.id) })
+  } catch (error) {
+    return sendError(res, error.message, [], 400)
+  }
+}
+
+export const getPublicCategoriesController = async (req, res, next) => {
+  try {
+    const categories = await getPublicCategories()
+    return sendSuccess(res, 'Public categories fetched successfully', categories)
   } catch (error) {
     return next(error)
   }

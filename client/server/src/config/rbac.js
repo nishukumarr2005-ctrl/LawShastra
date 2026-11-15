@@ -1,0 +1,102 @@
+export const ROLES = {
+  SUPER_ADMIN: 'SUPER_ADMIN',
+  ADMIN: 'ADMIN',
+  EDITOR: 'EDITOR',
+  AUTHOR: 'AUTHOR',
+  REVIEWER: 'REVIEWER',
+  MEDIA_MANAGER: 'MEDIA_MANAGER',
+  ANALYST: 'ANALYST',
+}
+
+export const PERMISSIONS = {
+  // Categories
+  CATEGORIES_READ: 'categories.read',
+  CATEGORIES_CREATE: 'categories.create',
+  CATEGORIES_UPDATE: 'categories.update',
+  CATEGORIES_DELETE: 'categories.delete',
+
+  // Articles & Content
+  ARTICLES_READ: 'articles.read',
+  ARTICLES_CREATE: 'articles.create',
+  ARTICLES_UPDATE: 'articles.update',
+  ARTICLES_PUBLISH: 'articles.publish',
+  ARTICLES_DELETE: 'articles.delete',
+
+  // Media
+  MEDIA_UPLOAD: 'media.upload',
+  MEDIA_DELETE: 'media.delete',
+
+  // Users & Roles
+  USERS_READ: 'users.read',
+  USERS_MANAGE: 'users.manage',
+  ROLES_MANAGE: 'roles.manage',
+
+  // Website & System Settings
+  SETTINGS_MANAGE: 'settings.manage',
+  FEATURES_MANAGE: 'features.manage',
+  AUDIT_READ: 'audit.read',
+}
+
+export const ROLE_PERMISSIONS = {
+  [ROLES.SUPER_ADMIN]: ['*'], // Full unrestricted super administrator access
+  [ROLES.ADMIN]: [
+    PERMISSIONS.CATEGORIES_READ,
+    PERMISSIONS.CATEGORIES_CREATE,
+    PERMISSIONS.CATEGORIES_UPDATE,
+    PERMISSIONS.CATEGORIES_DELETE,
+    PERMISSIONS.ARTICLES_READ,
+    PERMISSIONS.ARTICLES_CREATE,
+    PERMISSIONS.ARTICLES_UPDATE,
+    PERMISSIONS.ARTICLES_PUBLISH,
+    PERMISSIONS.ARTICLES_DELETE,
+    PERMISSIONS.MEDIA_UPLOAD,
+    PERMISSIONS.MEDIA_DELETE,
+    PERMISSIONS.USERS_READ,
+    PERMISSIONS.SETTINGS_MANAGE,
+    PERMISSIONS.FEATURES_MANAGE,
+    PERMISSIONS.AUDIT_READ,
+  ],
+  [ROLES.EDITOR]: [
+    PERMISSIONS.CATEGORIES_READ,
+    PERMISSIONS.CATEGORIES_CREATE,
+    PERMISSIONS.CATEGORIES_UPDATE,
+    PERMISSIONS.ARTICLES_READ,
+    PERMISSIONS.ARTICLES_CREATE,
+    PERMISSIONS.ARTICLES_UPDATE,
+    PERMISSIONS.MEDIA_UPLOAD,
+  ],
+  [ROLES.AUTHOR]: [
+    PERMISSIONS.CATEGORIES_READ,
+    PERMISSIONS.ARTICLES_READ,
+    PERMISSIONS.ARTICLES_CREATE,
+    PERMISSIONS.ARTICLES_UPDATE,
+    PERMISSIONS.MEDIA_UPLOAD,
+  ],
+  [ROLES.REVIEWER]: [
+    PERMISSIONS.CATEGORIES_READ,
+    PERMISSIONS.ARTICLES_READ,
+    PERMISSIONS.ARTICLES_UPDATE,
+    PERMISSIONS.ARTICLES_PUBLISH,
+  ],
+  [ROLES.MEDIA_MANAGER]: [
+    PERMISSIONS.CATEGORIES_READ,
+    PERMISSIONS.ARTICLES_READ,
+    PERMISSIONS.MEDIA_UPLOAD,
+    PERMISSIONS.MEDIA_DELETE,
+  ],
+  [ROLES.ANALYST]: [
+    PERMISSIONS.CATEGORIES_READ,
+    PERMISSIONS.ARTICLES_READ,
+    PERMISSIONS.AUDIT_READ,
+  ],
+}
+
+export const getPermissionsForRole = (role) => {
+  return ROLE_PERMISSIONS[role] || []
+}
+
+export const hasPermission = (userPermissions = [], requiredPermission) => {
+  if (!Array.isArray(userPermissions) || userPermissions.length === 0) return false
+  if (userPermissions.includes('*')) return true
+  return userPermissions.includes(requiredPermission)
+}

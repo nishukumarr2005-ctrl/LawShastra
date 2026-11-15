@@ -282,9 +282,9 @@ export function AdminDashboardPage() {
 
       try {
         const [serverLaws, serverCategories, serverCourses] = await Promise.all([
-          getLaws().catch(() => []),
-          getCategories().catch(() => []),
-          getCourses().catch(() => []),
+          getLaws(),
+          getCategories(),
+          getCourses(),
         ])
 
         const normalizedLaws = (serverLaws as any[]).map(normalizeLaw)
@@ -423,7 +423,7 @@ export function AdminDashboardPage() {
 
   const dashboardBanner = apiError ? (
     <div className="mb-4 rounded-2xl border border-[#F7D0C8] bg-[#FFF4F0] px-4 py-3 text-sm text-[#8C3D2E]">
-      Unable to load records from the backend server. Add content from the admin panel to populate this dashboard.
+      Unable to load records from the backend server: {apiError}. Check that PostgreSQL is running, the database migrations are applied, and the API server is running on port 5000.
     </div>
   ) : null
 

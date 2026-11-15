@@ -7,10 +7,19 @@ export type ApiResponse<T> = {
 }
 
 export async function apiRequest<T>(endpoint: string, options: { method?: string; body?: unknown } = {}): Promise<T> {
+  let token: string | null = null
+  try {
+    token = localStorage.getItem('lawshastra_admin_token')
+  } catch {
+    token = null
+  }
+
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     method: options.method || 'GET',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
   })

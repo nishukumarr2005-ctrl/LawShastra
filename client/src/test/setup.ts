@@ -1,4 +1,11 @@
 import '@testing-library/jest-dom/vitest'
+import * as matchers from '@testing-library/jest-dom/matchers'
+
+// @ts-expect-error global expect in vitest globals mode
+if (typeof expect !== 'undefined' && expect.extend) {
+  // @ts-expect-error matchers object
+  expect.extend(matchers)
+}
 
 if (!globalThis.DOMMatrix) {
   class DOMMatrixMock {
@@ -47,4 +54,8 @@ if (!globalThis.DOMMatrix) {
 
   // @ts-expect-error jsdom does not expose DOMMatrix in the test runtime
   globalThis.DOMMatrix = DOMMatrixMock
+}
+
+if (typeof window !== 'undefined') {
+  window.scrollTo = () => undefined
 }

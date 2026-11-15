@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest'
 import { extractPdfChapters } from '../features/admin/pages/AdminDashboardPage'
 
 describe('extractPdfChapters', () => {
