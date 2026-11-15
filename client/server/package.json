@@ -4,26 +4,35 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "nodemon src/server.js",
+    "dev": "wrangler dev",
+    "dev:node": "nodemon src/server.js",
     "start": "node src/server.js",
+    "deploy": "wrangler deploy",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
     "prisma:status": "prisma migrate status",
     "db:seed": "node prisma/seed.js",
+    "db:setup": "prisma generate && prisma migrate deploy && node prisma/seed.js",
+    "d1:migrate:local": "wrangler d1 execute lexQuora-db --local --file=prisma/migrations/0001_init.sql",
+    "d1:migrate:remote": "wrangler d1 execute lexQuora-db --remote --file=prisma/migrations/0001_init.sql",
+    "d1:seed:local": "wrangler d1 execute lexQuora-db --local --file=prisma/seed-d1.sql",
+    "d1:seed:remote": "wrangler d1 execute lexQuora-db --remote --file=prisma/seed-d1.sql",
     "lint": "node --check src/**/*.js"
   },
   "dependencies": {
-    "@prisma/client": "^5.22.0",
+    "@prisma/adapter-d1": "^7.10.1",
+    "@prisma/client": "^7.10.1",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
-    "dotenv": "^17.0.1",
+    "dotenv": "^17.4.2",
     "express": "^4.21.2",
     "express-rate-limit": "^7.4.1",
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
-    "prisma": "^5.22.0",
+    "prisma": "^7.10.1",
     "swagger-jsdoc": "^6.3.0",
     "swagger-ui-express": "^5.0.1",
     "winston": "^3.19.0",
@@ -32,6 +41,7 @@
   "devDependencies": {
     "jest": "^29.7.0",
     "nodemon": "^3.1.10",
-    "supertest": "^7.0.0"
+    "supertest": "^7.0.0",
+    "wrangler": "^4.162.0"
   }
 }

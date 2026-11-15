@@ -1,88 +1,66 @@
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+  runtime  = "cloudflare"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-enum UserRole {
-  ADMIN
-  EDITOR
-  USER
-}
-
-enum ContentStatus {
-  DRAFT
-  REVIEW
-  PUBLISHED
-}
-
-enum CategoryStatus {
-  LIVE
-  DRAFT
-}
-
-enum CourseLevel {
-  BEGINNER
-  INTERMEDIATE
-  ADVANCED
+  provider = "sqlite"
 }
 
 model User {
-  id            Int       @id @default(autoincrement())
+  id            Int            @id @default(autoincrement())
   name          String
-  email         String    @unique
+  email         String         @unique
   passwordHash  String
-  role          UserRole  @default(USER)
-  isActive      Boolean   @default(true)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  role          String         @default("USER")
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   refreshTokens RefreshToken[]
   auditLogs     AuditLog[]
 }
 
 model RefreshToken {
-  id          Int      @id @default(autoincrement())
-  token       String   @unique
-  userId      Int
-  expiresAt   DateTime
-  revoked     Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Category {
-  id          Int            @id @default(autoincrement())
-  name        String         @unique
-  slug        String         @unique
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  slug        String   @unique
   description String?
-  status      CategoryStatus @default(LIVE)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  status      String   @default("LIVE")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   laws        Law[]
 }
 
 model Law {
-  id                  Int            @id @default(autoincrement())
-  title               String
-  shortTitle          String?
+  id                   Int           @id @default(autoincrement())
+  title                String
+  shortTitle           String?
   subcategoryShortName String?
-  slug                String         @unique
-  categoryId          Int
-  category            Category       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  jurisdiction        String         @default("India")
-  summary             String
-  sourceUrl           String?
-  sourceLabel         String?
-  status              ContentStatus  @default(DRAFT)
-  pdfUrl              String?
-  pdfExtractedText    String?
-  createdAt           DateTime       @default(now())
-  updatedAt           DateTime       @updatedAt
-  subcategories       Subcategory[]
-  chapters            Chapter[]
+  slug                 String        @unique
+  categoryId           Int
+  category             Category      @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  jurisdiction         String        @default("India")
+  summary              String
+  sourceUrl            String?
+  sourceLabel          String?
+  status               String        @default("DRAFT")
+  pdfUrl               String?
+  pdfExtractedText     String?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  subcategories        Subcategory[]
+  chapters             Chapter[]
 }
 
 model Subcategory {
@@ -106,15 +84,15 @@ model Chapter {
 }
 
 model Course {
-  id          Int          @id @default(autoincrement())
-  title       String
-  category    String
-  level       CourseLevel  @default(BEGINNER)
-  duration    String
-  status      ContentStatus @default(DRAFT)
-  summary     String?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id        Int      @id @default(autoincrement())
+  title     String
+  category  String
+  level     String   @default("BEGINNER")
+  duration  String
+  status    String   @default("DRAFT")
+  summary   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model AuditLog {
@@ -137,79 +115,39 @@ model ApiKey {
   revoked   Boolean  @default(false)
 }
 
-enum PublishStatus {
-  Draft
-  Review
-  Published
-}
-
-enum BannerStatus {
-  Active
-  Scheduled
-  Hidden
-}
-
-enum MenuLocation {
-  Header
-  Footer
-  Sidebar
-}
-
-enum NotificationChannel {
-  In_App
-  Email
-}
-
-enum BackupStatus {
-  Completed
-  Running
-  Failed
-}
-
-enum ActivityLevel {
-  info
-  warning
-  success
-}
-
-enum CmsSubcategoryStatus {
-  Published
-  Draft
-}
-
 model CmsSubcategory {
-  id         Int                  @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   name       String
   slug       String
   categoryId Int?
-  status     CmsSubcategoryStatus @default(Draft)
-  createdAt  DateTime             @default(now())
-  updatedAt  DateTime             @updatedAt
+  status     String   @default("Draft")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model Article {
-  id         Int           @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   title      String
-  slug       String        @unique
+  slug       String   @unique
   categoryId Int?
   excerpt    String?
   content    String?
-  status     PublishStatus @default(Draft)
+  status     String   @default("Draft")
   author     String?
-  tags       String[]      @default([])
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
+  tags       String   @default("[]")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model Page {
-  id        Int           @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   title     String
-  slug      String        @unique
-  status    PublishStatus @default(Draft)
-  template  String        @default("Standard")
+  slug      String   @unique
+  status    String   @default("Draft")
+  template  String   @default("Standard")
   content   String?
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Media {
@@ -242,25 +180,25 @@ model HomepageBlock {
 }
 
 model Banner {
-  id        Int          @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   title     String
   location  String
-  status    BannerStatus @default(Active)
+  status    String   @default("Active")
   link      String?
   image     String?
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model MenuItem {
-  id        Int          @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   label     String
   path      String
-  location  MenuLocation @default(Header)
-  visible   Boolean      @default(true)
-  order     Int          @default(0)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  location  String   @default("Header")
+  visible   Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model VisibilityRule {
@@ -288,7 +226,7 @@ model AdminRole {
   id          Int      @id @default(autoincrement())
   name        String   @unique
   description String?
-  permissions String[] @default([])
+  permissions String   @default("[]")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -315,29 +253,29 @@ model SiteSetting {
 }
 
 model AdminActivityLog {
-  id        Int           @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   actor     String?
   action    String
   target    String?
-  level     ActivityLevel @default(info)
-  createdAt DateTime      @default(now())
+  level     String   @default("info")
+  createdAt DateTime @default(now())
 }
 
 model Notification {
-  id        Int                 @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   title     String
   message   String
-  channel   NotificationChannel @default(In_App)
-  read      Boolean             @default(false)
-  createdAt DateTime            @default(now())
+  channel   String   @default("In_App")
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
 }
 
 model Backup {
-  id        Int          @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   label     String
   size      String?
-  status    BackupStatus @default(Completed)
-  createdAt DateTime     @default(now())
+  status    String   @default("Completed")
+  createdAt DateTime @default(now())
 }
 
 model MaintenanceTask {
