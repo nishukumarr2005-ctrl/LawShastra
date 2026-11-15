@@ -391,8 +391,6 @@ async function hydrateFromApi() {
   return hydratePromise
 }
 
-void hydrateFromApi()
-
 export function useAdminStore<T>(selector: (s: AdminState) => T): T {
   const [snap, setSnap] = useState(state)
   useEffect(() => subscribe(() => setSnap(state)), [])

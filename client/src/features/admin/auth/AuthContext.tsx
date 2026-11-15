@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react'
+import React, { createContext, useContext, useEffect, useState } from 'react'
 import { adminActions } from '@/features/admin/shared/adminStore'
 
 export interface AuthUser {
@@ -48,6 +48,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   })
 
   const [isLoading] = useState(false)
+
+  useEffect(() => {
+    if (user || token) {
+      void adminActions.hydrate()
+    }
+  }, [user, token])
 
   const login = (userData: AuthUser, authToken?: string) => {
     setUser(userData)
