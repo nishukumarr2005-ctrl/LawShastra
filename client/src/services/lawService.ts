@@ -65,6 +65,10 @@ export async function getLaws(): Promise<LawApiItem[]> {
   return apiRequest<LawApiItem[]>('/laws')
 }
 
+export async function getLawBySlug(slug: string): Promise<LawApiItem> {
+  return apiRequest<LawApiItem>(`/laws/slug/${encodeURIComponent(slug)}`)
+}
+
 export async function getCategories(): Promise<CategoryApiItem[]> {
   return apiRequest<CategoryApiItem[]>('/categories')
 }
