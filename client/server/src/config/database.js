@@ -1,8 +1,7 @@
 // Prisma client accessor.
 // - Workers/D1: src/index.js creates PrismaClient with PrismaD1 adapter and calls setPrisma().
 // - Node/local: lazy-creates PrismaClient from env (postgres or sqlite url) on first use.
-import { PrismaClient } from '@prisma/client'
-
+import { PrismaClient } from './generated/prisma/client';
 let _prisma = null
 
 export function setPrisma(client) {
