@@ -1,10 +1,4 @@
-﻿import fs from 'fs'
-import path from 'path'
-import { fileURLToPath } from 'url'
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const dataDir = path.resolve(__dirname, '../../../data')
-const dataFile = path.join(dataDir, 'cms-store.json')
+﻿const canPersist = () => false
 
 const uid = () => Date.now() + Math.floor(Math.random() * 1000)
 const now = () => new Date().toISOString()
@@ -100,30 +94,14 @@ const seed = () => ({
 
 let store = null
 
-function ensureDir() {
-  try { fs.mkdirSync(dataDir, { recursive: true }) } catch {}
-}
-
 function load() {
   if (store) return store
-  ensureDir()
-  try {
-    if (fs.existsSync(dataFile)) {
-      const raw = fs.readFileSync(dataFile, 'utf-8')
-      store = { ...seed(), ...JSON.parse(raw) }
-    } else {
-      store = seed()
-      save()
-    }
-  } catch {
-    store = seed()
-  }
+  store = seed()
   return store
 }
 
 function save() {
-  ensureDir()
-  try { fs.writeFileSync(dataFile, JSON.stringify(store, null, 2), 'utf-8') } catch {}
+  // in-memory only (Workers-safe)
 }
 
 export function logActivity(actor, action, target, level = 'info') {

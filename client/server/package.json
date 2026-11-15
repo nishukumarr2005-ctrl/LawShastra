@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "wrangler dev",
     "dev:node": "nodemon src/server.js",
-    "start": "node src/server.js",
+    "start": "wrangler dev",
+    "start:node": "node src/server.js",
     "deploy": "wrangler deploy",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand",
     "prisma:generate": "prisma generate",

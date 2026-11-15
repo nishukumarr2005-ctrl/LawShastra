@@ -4,10 +4,13 @@
   "main": "src/index.js",
   "compatibility_date": "2026-11-15",
   "compatibility_flags": ["nodejs_compat"],
+  "alias": {
+    "body-parser": "./src/stubs/body-parser.js"
+  },
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "lexQuora-db",
+      "database_name": "lexQuora",
       "database_id": "c8468a7a-bcee-4b29-8663-87195fed08a2"
     }
   ]
