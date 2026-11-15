@@ -47,6 +47,20 @@ export type CreateLawPayload = {
   pdfExtractedText?: string
 }
 
+export type PublicSubcategory = {
+  id: number
+  name: string
+  slug: string
+  categoryId: number
+  status?: string
+}
+
+export type PublicCatalog = {
+  categories: Array<CategoryApiItem & { description?: string; icon?: string }>
+  subcategories: PublicSubcategory[]
+  laws: Array<LawApiItem & { slug?: string }>
+}
+
 export async function getLaws(): Promise<LawApiItem[]> {
   return apiRequest<LawApiItem[]>('/laws')
 }
@@ -57,6 +71,10 @@ export async function getCategories(): Promise<CategoryApiItem[]> {
 
 export async function getCourses(): Promise<CourseApiItem[]> {
   return apiRequest<CourseApiItem[]>('/courses')
+}
+
+export async function getPublicCatalog(): Promise<PublicCatalog> {
+  return apiRequest<PublicCatalog>('/public/catalog')
 }
 
 export async function createLaw(payload: CreateLawPayload): Promise<LawApiItem> {

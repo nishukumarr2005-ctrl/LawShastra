@@ -7,6 +7,7 @@ import userRoutes from './user.routes.js'
 import adminCategoryRoutes from './admin/categories.routes.js'
 import adminCmsRoutes from './admin/cms.routes.js'
 import publicCategoryRoutes from './public/categories.routes.js'
+import publicCatalogRoutes from './public/catalog.routes.js'
 import { getDashboardController } from '../controllers/dashboard.controller.js'
 import { authenticate } from '../middlewares/auth.js'
 
@@ -23,6 +24,7 @@ router.use('/admin', adminCmsRoutes)
 
 // Public API
 router.use('/public/categories', publicCategoryRoutes)
+router.use('/public', publicCatalogRoutes)
 
 // Existing endpoints preserved for full backward compatibility
 router.use('/categories', categoryRoutes)

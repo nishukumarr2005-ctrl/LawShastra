@@ -10,9 +10,11 @@ import {
   LogOut,
   User,
   Settings,
+  RefreshCw,
 } from 'lucide-react'
 import { DropdownMenu } from '@/components/ui/DropdownMenu'
 import { cn } from '@/utils/cn'
+import { adminActions, useAdminStore } from '@/features/admin/shared/adminStore'
 
 export interface AdminHeaderProps {
   onMenuClick?: () => void
@@ -36,6 +38,7 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
   const navigate = useNavigate()
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [unreadCount] = useState(3)
+  const { hydrating, syncError } = useAdminStore((s) => ({ hydrating: s.hydrating, syncError: s.syncError }))
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode)
@@ -121,6 +124,22 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
 
       {/* Right Actions */}
       <div className="flex items-center gap-2 sm:gap-3">
+        {/* Sync status / refresh */}
+        <button
+          type="button"
+          onClick={() => void adminActions.hydrate()}
+          title={syncError ? `Sync issue: ${syncError}. Click to retry.` : 'Refresh admin data'}
+          aria-label="Refresh admin data"
+          className={cn(
+            'flex h-9 w-9 items-center justify-center rounded-xl border transition-colors',
+            syncError
+              ? 'border-rose-300 text-rose-600 hover:bg-rose-50 dark:border-rose-800 dark:text-rose-400'
+              : 'border-slate-200 text-slate-600 hover:bg-slate-100 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800'
+          )}
+        >
+          <RefreshCw className={cn('h-4 w-4', hydrating && 'animate-spin')} />
+        </button>
+
         {/* View Public Website */}
         <Link
           to="/categories"

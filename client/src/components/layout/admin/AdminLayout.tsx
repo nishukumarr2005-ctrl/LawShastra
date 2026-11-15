@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import { AdminSidebar } from './AdminSidebar'
 import { AdminHeader } from './AdminHeader'
 import { AdminBreadcrumb } from './AdminBreadcrumb'
 import { ToastProvider } from '@/components/ui/Toast'
 import { cn } from '@/utils/cn'
+import { adminActions } from '@/features/admin/shared/adminStore'
 
 export interface AdminLayoutProps {
   children?: React.ReactNode
@@ -14,6 +15,10 @@ export interface AdminLayoutProps {
 export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, className }) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
+
+  useEffect(() => {
+    void adminActions.hydrate()
+  }, [])
 
   return (
     <ToastProvider>

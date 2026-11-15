@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from 'react'
+import { adminActions } from '@/features/admin/shared/adminStore'
 
 export interface AuthUser {
   id: number
@@ -55,6 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('lawshastra_admin_token', authToken)
     }
     localStorage.setItem('lawshastra_admin_user', JSON.stringify(userData))
+    void adminActions.hydrate()
   }
 
   const logout = () => {

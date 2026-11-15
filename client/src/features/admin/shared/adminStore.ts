@@ -187,6 +187,7 @@ export interface MaintenanceTask {
 
 interface AdminState {
   hydrated: boolean
+  hydrating: boolean
   categories: AdminCategory[]
   subcategories: AdminSubcategory[]
   articles: AdminArticle[]
@@ -219,6 +220,7 @@ const slugify = (value: string) => value.toLowerCase().trim().replace(/[^a-z0-9\
 
 const seedState = (): AdminState => ({
   hydrated: false,
+  hydrating: false,
   categories: [],
   subcategories: [],
   articles: [],
@@ -253,7 +255,10 @@ function loadState(): AdminState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return seedState()
-    return { ...seedState(), ...(JSON.parse(raw) as Partial<AdminState>) }
+    const parsed = { ...seedState(), ...(JSON.parse(raw) as Partial<AdminState>) }
+    // never persist in-flight state across reloads
+    parsed.hydrating = false
+    return parsed
   } catch {
     return seedState()
   }
@@ -310,48 +315,58 @@ const mapUser = (u: any): AdminUser => ({
   lastActive: u.updatedAt || u.lastActive || now(),
 })
 
-async function hydrateFromApi() {
-  try {
-    // Primary: bootstrap for CMS collections
-    const [bootstrap, cats, laws, users] = await Promise.all([
-      api.fetchBootstrap().catch(() => null),
-      api.fetchAdminCategories().catch(() => null),
-      api.fetchLegalResources().catch(() => null),
-      api.fetchUsers().catch(() => null),
-    ])
+let hydratePromise: Promise<void> | null = null
 
-    setState((prev) => {
-      let next = { ...prev }
-      if (bootstrap && typeof bootstrap === 'object') {
-        if (Array.isArray(bootstrap.subcategories)) next.subcategories = bootstrap.subcategories
-        if (Array.isArray(bootstrap.articles)) next.articles = bootstrap.articles
-        if (Array.isArray(bootstrap.pages)) next.pages = bootstrap.pages
-        if (Array.isArray(bootstrap.media)) next.media = bootstrap.media
-        if (Array.isArray(bootstrap.tags)) next.tags = bootstrap.tags
-        if (Array.isArray(bootstrap.homepageBlocks)) next.homepageBlocks = bootstrap.homepageBlocks
-        if (Array.isArray(bootstrap.banners)) next.banners = bootstrap.banners
-        if (Array.isArray(bootstrap.menus)) next.menus = bootstrap.menus
-        if (Array.isArray(bootstrap.visibilityRules)) next.visibilityRules = bootstrap.visibilityRules
-        if (Array.isArray(bootstrap.seoEntries)) next.seoEntries = bootstrap.seoEntries
-        if (Array.isArray(bootstrap.roles)) next.roles = bootstrap.roles
-        if (Array.isArray(bootstrap.featureFlags)) next.featureFlags = bootstrap.featureFlags
-        if (bootstrap.settings) next.settings = { ...next.settings, ...bootstrap.settings }
-        if (Array.isArray(bootstrap.activityLogs)) next.activityLogs = bootstrap.activityLogs
-        if (Array.isArray(bootstrap.notifications)) next.notifications = bootstrap.notifications
-        if (Array.isArray(bootstrap.backups)) next.backups = bootstrap.backups
-        if (Array.isArray(bootstrap.maintenance)) next.maintenance = bootstrap.maintenance
-      }
-      if (Array.isArray(cats)) next.categories = cats.map(mapCategory)
-      if (Array.isArray(laws)) next.legalResources = laws.map(mapLaw)
-      if (Array.isArray(users)) next.users = users.map(mapUser)
-      next.hydrated = true
-      next.lastSyncedAt = now()
-      next.syncError = null
-      return next
-    })
-  } catch (e: any) {
-    setState((prev) => ({ ...prev, hydrated: true, syncError: e?.message || 'Sync failed' }))
-  }
+async function hydrateFromApi() {
+  if (hydratePromise) return hydratePromise
+  hydratePromise = (async () => {
+    setState((prev) => ({ ...prev, hydrating: true, syncError: null }))
+    try {
+      // Primary: bootstrap for CMS collections
+      const [bootstrap, cats, laws, users] = await Promise.all([
+        api.fetchBootstrap().catch(() => null),
+        api.fetchAdminCategories().catch(() => null),
+        api.fetchLegalResources().catch(() => null),
+        api.fetchUsers().catch(() => null),
+      ])
+
+      setState((prev) => {
+        let next = { ...prev }
+        if (bootstrap && typeof bootstrap === 'object') {
+          if (Array.isArray(bootstrap.subcategories)) next.subcategories = bootstrap.subcategories
+          if (Array.isArray(bootstrap.articles)) next.articles = bootstrap.articles
+          if (Array.isArray(bootstrap.pages)) next.pages = bootstrap.pages
+          if (Array.isArray(bootstrap.media)) next.media = bootstrap.media
+          if (Array.isArray(bootstrap.tags)) next.tags = bootstrap.tags
+          if (Array.isArray(bootstrap.homepageBlocks)) next.homepageBlocks = bootstrap.homepageBlocks
+          if (Array.isArray(bootstrap.banners)) next.banners = bootstrap.banners
+          if (Array.isArray(bootstrap.menus)) next.menus = bootstrap.menus
+          if (Array.isArray(bootstrap.visibilityRules)) next.visibilityRules = bootstrap.visibilityRules
+          if (Array.isArray(bootstrap.seoEntries)) next.seoEntries = bootstrap.seoEntries
+          if (Array.isArray(bootstrap.roles)) next.roles = bootstrap.roles
+          if (Array.isArray(bootstrap.featureFlags)) next.featureFlags = bootstrap.featureFlags
+          if (bootstrap.settings) next.settings = { ...next.settings, ...bootstrap.settings }
+          if (Array.isArray(bootstrap.activityLogs)) next.activityLogs = bootstrap.activityLogs
+          if (Array.isArray(bootstrap.notifications)) next.notifications = bootstrap.notifications
+          if (Array.isArray(bootstrap.backups)) next.backups = bootstrap.backups
+          if (Array.isArray(bootstrap.maintenance)) next.maintenance = bootstrap.maintenance
+        }
+        if (Array.isArray(cats)) next.categories = cats.map(mapCategory)
+        if (Array.isArray(laws)) next.legalResources = laws.map(mapLaw)
+        if (Array.isArray(users)) next.users = users.map(mapUser)
+        next.hydrated = true
+        next.hydrating = false
+        next.lastSyncedAt = now()
+        next.syncError = null
+        return next
+      })
+    } catch (e: any) {
+      setState((prev) => ({ ...prev, hydrated: true, hydrating: false, syncError: e?.message || 'Sync failed' }))
+    } finally {
+      hydratePromise = null
+    }
+  })()
+  return hydratePromise
 }
 
 void hydrateFromApi()
