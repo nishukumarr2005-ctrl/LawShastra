@@ -18246,7 +18246,7 @@ var require_response = __commonJS({
       }
       return this;
     }, "send");
-    res.json = /* @__PURE__ */ __name(function json2(obj) {
+    res.json = /* @__PURE__ */ __name(function json3(obj) {
       var val = obj;
       if (arguments.length === 2) {
         if (typeof arguments[1] === "number") {
@@ -18640,9 +18640,9 @@ var require_response = __commonJS({
     }
     __name(sendfile, "sendfile");
     function stringify(value, replacer, spaces, escape2) {
-      var json2 = replacer || spaces ? JSON.stringify(value, replacer, spaces) : JSON.stringify(value);
-      if (escape2 && typeof json2 === "string") {
-        json2 = json2.replace(/[<>&]/g, function(c2) {
+      var json3 = replacer || spaces ? JSON.stringify(value, replacer, spaces) : JSON.stringify(value);
+      if (escape2 && typeof json3 === "string") {
+        json3 = json3.replace(/[<>&]/g, function(c2) {
           switch (c2.charCodeAt(0)) {
             case 60:
               return "\\u003c";
@@ -18656,7 +18656,7 @@ var require_response = __commonJS({
           }
         });
       }
-      return json2;
+      return json3;
     }
     __name(stringify, "stringify");
   }
@@ -38684,10 +38684,10 @@ var require_winston = __commonJS({
   }
 });
 
-// .wrangler/tmp/bundle-XdzlUP/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-WsJQjE/middleware-loader.entry.ts
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-XdzlUP/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-WsJQjE/middleware-insertion-facade.js
 init_modules_watch_stub();
 
 // src/index.js
@@ -40101,15 +40101,216 @@ if (gEnv && !gEnv.DATABASE_URL && env.databaseUrl) {
 
 // src/config/swagger.js
 init_modules_watch_stub();
+var json2 = /* @__PURE__ */ __name((schema = { type: "object" }) => ({
+  required: true,
+  content: { "application/json": { schema } }
+}), "json");
+var ok = /* @__PURE__ */ __name((description = "Success") => ({
+  description,
+  content: { "application/json": { schema: { $ref: "#/components/schemas/ApiResponse" } } }
+}), "ok");
+var bearer = [{ bearerAuth: [] }];
+var idParam = { name: "id", in: "path", required: true, schema: { type: "integer" } };
+var slugParam = { name: "slug", in: "path", required: true, schema: { type: "string" } };
+var crudPaths = /* @__PURE__ */ __name((base, tag2, itemSchemaName, secured = false) => ({
+  [`${base}`]: {
+    get: { tags: [tag2], summary: `List ${tag2}`, ...secured ? { security: bearer } : {}, responses: { 200: ok() } },
+    post: { tags: [tag2], summary: `Create ${tag2.slice(0, -1) || tag2}`, ...secured ? { security: bearer } : {}, requestBody: json2({ $ref: `#/components/schemas/${itemSchemaName}` }), responses: { 200: ok(), 201: ok("Created") } }
+  },
+  [`${base}/{id}`]: {
+    get: { tags: [tag2], summary: `Get ${tag2.slice(0, -1) || tag2}`, ...secured ? { security: bearer } : {}, parameters: [idParam], responses: { 200: ok(), 404: ok("Not found") } },
+    put: { tags: [tag2], summary: `Update ${tag2.slice(0, -1) || tag2}`, ...secured ? { security: bearer } : {}, parameters: [idParam], requestBody: json2({ $ref: `#/components/schemas/${itemSchemaName}` }), responses: { 200: ok() } },
+    delete: { tags: [tag2], summary: `Delete ${tag2.slice(0, -1) || tag2}`, ...secured ? { security: bearer } : {}, parameters: [idParam], responses: { 200: ok() } }
+  }
+}), "crudPaths");
 var swaggerSpec = {
   openapi: "3.0.0",
   info: {
     title: "LawShastra API",
     version: "1.0.0",
-    description: "API documentation for the LawShastra legal learning platform"
+    description: "API documentation for the LawShastra legal learning platform (Cloudflare Workers + D1). Base URL includes /api/v1."
   },
-  servers: [{ url: "/api/v1" }],
-  paths: {}
+  servers: [{ url: "/api/v1", description: "Current origin /api/v1" }],
+  tags: [
+    { name: "Health" },
+    { name: "Auth" },
+    { name: "Public" },
+    { name: "Categories" },
+    { name: "Laws" },
+    { name: "Courses" },
+    { name: "Admin Dashboard" },
+    { name: "Admin Users" },
+    { name: "Admin Categories" },
+    { name: "Admin CMS" }
+  ],
+  paths: {
+    // Health (served outside /api/v1 at /api/health, included for reference)
+    "/api/health": {
+      get: { tags: ["Health"], summary: "Health check", servers: [{ url: "/" }], responses: { 200: ok("API is healthy") } }
+    },
+    // Auth
+    "/auth/login": {
+      post: {
+        tags: ["Auth"],
+        summary: "Admin login",
+        requestBody: json2({
+          type: "object",
+          required: ["email", "password"],
+          properties: { email: { type: "string", format: "email" }, password: { type: "string" } }
+        }),
+        responses: { 200: ok("Logged in"), 401: ok("Invalid credentials") }
+      }
+    },
+    "/auth/register": {
+      post: {
+        tags: ["Auth"],
+        summary: "Register (placeholder endpoint)",
+        requestBody: json2({ type: "object", properties: { email: { type: "string" } } }),
+        responses: { 201: ok("Registration endpoint ready") }
+      }
+    },
+    "/auth/me": {
+      get: { tags: ["Auth"], summary: "Get current user", security: bearer, responses: { 200: ok(), 401: ok("Unauthorized") } }
+    },
+    "/auth/logout": {
+      post: { tags: ["Auth"], summary: "Logout", responses: { 200: ok() } }
+    },
+    // Public
+    "/public/catalog": { get: { tags: ["Public"], summary: "Get public catalog (categories, subcategories, published laws)", responses: { 200: ok() } } },
+    "/public/cms": { get: { tags: ["Public"], summary: "Get public CMS data", responses: { 200: ok() } } },
+    "/public/categories": { get: { tags: ["Public"], summary: "Get live/published categories", responses: { 200: ok() } } },
+    // Legacy/public-facing resources
+    ...crudPaths("/categories", "Categories", "Category"),
+    "/laws": {
+      get: { tags: ["Laws"], summary: "List laws", responses: { 200: ok() } },
+      post: { tags: ["Laws"], summary: "Create law", requestBody: json2({ $ref: "#/components/schemas/Law" }), responses: { 201: ok("Created") } }
+    },
+    "/laws/slug/{slug}": {
+      get: { tags: ["Laws"], summary: "Get law by slug", parameters: [slugParam], responses: { 200: ok(), 404: ok("Not found") } }
+    },
+    "/laws/{id}": {
+      put: { tags: ["Laws"], summary: "Update law", parameters: [idParam], requestBody: json2({ $ref: "#/components/schemas/Law" }), responses: { 200: ok() } },
+      delete: { tags: ["Laws"], summary: "Delete law", parameters: [idParam], responses: { 200: ok() } }
+    },
+    ...crudPaths("/courses", "Courses", "Course"),
+    // Admin
+    "/admin/dashboard": { get: { tags: ["Admin Dashboard"], summary: "Get admin dashboard data", security: bearer, responses: { 200: ok(), 401: ok() } } },
+    "/admin/users": {
+      get: { tags: ["Admin Users"], summary: "List users", security: bearer, responses: { 200: ok() } },
+      post: { tags: ["Admin Users"], summary: "Create user", security: bearer, requestBody: json2({ $ref: "#/components/schemas/UserInput" }), responses: { 201: ok("Created") } }
+    },
+    "/admin/users/roles": { get: { tags: ["Admin Users"], summary: "Get role definitions and permissions", security: bearer, responses: { 200: ok() } } },
+    "/admin/users/{id}": {
+      get: { tags: ["Admin Users"], summary: "Get user", security: bearer, parameters: [idParam], responses: { 200: ok(), 404: ok() } },
+      put: { tags: ["Admin Users"], summary: "Update user", security: bearer, parameters: [idParam], requestBody: json2({ $ref: "#/components/schemas/UserInput" }), responses: { 200: ok() } },
+      delete: { tags: ["Admin Users"], summary: "Delete user", security: bearer, parameters: [idParam], responses: { 200: ok() } }
+    },
+    ...crudPaths("/admin/categories", "Admin Categories", "Category", true),
+    // Admin CMS (generic CRUD + actions)
+    "/admin/bootstrap": { get: { tags: ["Admin CMS"], summary: "Bootstrap admin CMS data", security: bearer, responses: { 200: ok() } } },
+    ...crudPaths("/admin/subcategories", "Admin CMS", "GenericItem", true),
+    ...crudPaths("/admin/articles", "Admin CMS", "GenericItem", true),
+    ...crudPaths("/admin/pages", "Admin CMS", "GenericItem", true),
+    ...crudPaths("/admin/media", "Admin CMS", "GenericItem", true),
+    ...crudPaths("/admin/tags", "Admin CMS", "GenericItem", true),
+    ...crudPaths("/admin/homepage-blocks", "Admin CMS", "GenericItem", true),
+    ...crudPaths("/admin/banners", "Admin CMS", "GenericItem", true),
+    ...crudPaths("/admin/menus", "Admin CMS", "GenericItem", true),
+    ...crudPaths("/admin/visibility", "Admin CMS", "GenericItem", true),
+    ...crudPaths("/admin/seo", "Admin CMS", "GenericItem", true),
+    ...crudPaths("/admin/feature-flags", "Admin CMS", "GenericItem", true),
+    ...crudPaths("/admin/roles", "Admin CMS", "GenericItem", true),
+    "/admin/feature-flags/{id}/toggle": { post: { tags: ["Admin CMS"], summary: "Toggle feature flag", security: bearer, parameters: [idParam], responses: { 200: ok() } } },
+    "/admin/settings": {
+      get: { tags: ["Admin CMS"], summary: "Get site settings", security: bearer, responses: { 200: ok() } },
+      put: { tags: ["Admin CMS"], summary: "Update site settings", security: bearer, requestBody: json2({ $ref: "#/components/schemas/GenericItem" }), responses: { 200: ok() } }
+    },
+    "/admin/activity-logs": {
+      get: { tags: ["Admin CMS"], summary: "List activity logs", security: bearer, responses: { 200: ok() } },
+      post: { tags: ["Admin CMS"], summary: "Create activity log entry", security: bearer, requestBody: json2({ $ref: "#/components/schemas/GenericItem" }), responses: { 201: ok() } }
+    },
+    "/admin/notifications": {
+      get: { tags: ["Admin CMS"], summary: "List notifications", security: bearer, responses: { 200: ok() } },
+      post: { tags: ["Admin CMS"], summary: "Create notification", security: bearer, requestBody: json2({ $ref: "#/components/schemas/GenericItem" }), responses: { 201: ok() } }
+    },
+    "/admin/notifications/{id}/read": { post: { tags: ["Admin CMS"], summary: "Mark notification read", security: bearer, parameters: [idParam], responses: { 200: ok() } } },
+    "/admin/backups": { get: { tags: ["Admin CMS"], summary: "List backups", security: bearer, responses: { 200: ok() } } },
+    "/admin/backups/run": { post: { tags: ["Admin CMS"], summary: "Run backup", security: bearer, responses: { 200: ok() } } },
+    "/admin/maintenance": { get: { tags: ["Admin CMS"], summary: "List maintenance tasks", security: bearer, responses: { 200: ok() } } },
+    "/admin/maintenance/{id}/toggle": { post: { tags: ["Admin CMS"], summary: "Toggle maintenance task", security: bearer, parameters: [idParam], responses: { 200: ok() } } },
+    "/admin/maintenance/{id}/run": { post: { tags: ["Admin CMS"], summary: "Run maintenance task", security: bearer, parameters: [idParam], responses: { 200: ok() } } }
+  },
+  components: {
+    securitySchemes: {
+      bearerAuth: { type: "http", scheme: "bearer", bearerFormat: "JWT" }
+    },
+    schemas: {
+      ApiResponse: {
+        type: "object",
+        properties: {
+          success: { type: "boolean" },
+          message: { type: "string" },
+          data: {},
+          errors: { type: "array", items: { type: "object" } }
+        }
+      },
+      Category: {
+        type: "object",
+        properties: {
+          id: { type: "integer" },
+          name: { type: "string" },
+          slug: { type: "string" },
+          description: { type: "string", nullable: true },
+          status: { type: "string", example: "LIVE" }
+        }
+      },
+      Chapter: {
+        type: "object",
+        properties: {
+          id: { type: "integer" },
+          title: { type: "string" },
+          content: { type: "string", description: "HTML or plain text content" }
+        }
+      },
+      Law: {
+        type: "object",
+        properties: {
+          id: { type: "integer" },
+          title: { type: "string" },
+          shortTitle: { type: "string", nullable: true },
+          slug: { type: "string" },
+          categoryId: { type: "integer" },
+          jurisdiction: { type: "string", example: "India" },
+          summary: { type: "string" },
+          status: { type: "string", example: "DRAFT" },
+          subcategories: { type: "array", items: { type: "string" } },
+          chapters: { type: "array", items: { $ref: "#/components/schemas/Chapter" } }
+        }
+      },
+      Course: {
+        type: "object",
+        properties: {
+          id: { type: "integer" },
+          title: { type: "string" },
+          category: { type: "string" },
+          level: { type: "string" },
+          duration: { type: "string" },
+          status: { type: "string" },
+          summary: { type: "string", nullable: true }
+        }
+      },
+      UserInput: {
+        type: "object",
+        properties: {
+          name: { type: "string" },
+          email: { type: "string", format: "email" },
+          password: { type: "string" },
+          role: { type: "string" }
+        }
+      },
+      GenericItem: { type: "object", additionalProperties: true, description: "CMS resource payload (varies by endpoint)" }
+    }
+  }
 };
 
 // src/routes/index.js
@@ -52850,8 +53051,8 @@ var resource = /* @__PURE__ */ __name((key, opts = {}) => ({
     return sendSuccess(res, `${opts.label || key} updated`, item);
   }, "update"),
   remove: /* @__PURE__ */ __name((req, res) => {
-    const ok = cms.remove(key, req.params.id);
-    if (!ok) return sendError(res, "Not found", [], 404);
+    const ok2 = cms.remove(key, req.params.id);
+    if (!ok2) return sendError(res, "Not found", [], 404);
     cms.logActivity(req.user?.email || "Admin", `Deleted ${opts.label || key}`, `#${req.params.id}`, "warning");
     return sendSuccess(res, `${opts.label || key} deleted`, { id: Number(req.params.id) });
   }, "remove")
@@ -53183,7 +53384,7 @@ var corsOptions = {
 };
 app.use((0, import_cors.default)(corsOptions));
 app.options("*", (0, import_cors.default)(corsOptions));
-app.use(helmet());
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use((req, _res, next) => {
   const method = (req.method || "").toUpperCase();
   if (!["POST", "PUT", "PATCH", "DELETE"].includes(method)) return next();
@@ -53230,8 +53431,25 @@ app.use("/api/v1", (req, res, next) => {
 app.get("/api/health", (req, res) => {
   res.json({ success: true, message: "API is healthy", data: { status: "ok" } });
 });
-app.get("/api/docs", (req, res) => {
+app.get("/api/docs.json", (req, res) => {
   res.json(swaggerSpec);
+});
+app.get("/api/docs", (req, res) => {
+  res.type("html").send(`<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>LawShastra API Docs</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"><\/script>
+  <script>
+    window.ui = SwaggerUIBundle({ url: '/api/docs.json', dom_id: '#swagger-ui', presets: [SwaggerUIBundle.presets.apis], layout: 'BaseLayout' });
+  <\/script>
+</body>
+</html>`);
 });
 app.use(`/api/${env.apiVersion}`, routes_default);
 app.use(notFoundHandler);
@@ -54809,7 +55027,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env3, _ctx, middlewareCtx
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-XdzlUP/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-WsJQjE/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -54842,7 +55060,7 @@ function __facade_invoke__(request, env3, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-XdzlUP/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-WsJQjE/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

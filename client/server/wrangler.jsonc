@@ -7,6 +7,10 @@
   "alias": {
     "body-parser": "./src/stubs/body-parser.js"
   },
+  "vars": {
+    "API_VERSION": "v1",
+    "NODE_ENV": "production"
+  },
   "d1_databases": [
     {
       "binding": "DB",

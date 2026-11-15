@@ -32,7 +32,8 @@ const corsOptions = {
 
 app.use(cors(corsOptions))
 app.options('*', cors(corsOptions))
-app.use(helmet())
+// Disable CSP so /api/docs (Swagger UI via CDN + inline init) can load; keep other helmet protections
+app.use(helmet({ contentSecurityPolicy: false }))
 
 // Lightweight body parsing to avoid body-parser/iconv-lite issues in Workers runtime
 app.use((req, _res, next) => {
@@ -85,8 +86,26 @@ app.get('/api/health', (req, res) => {
   res.json({ success: true, message: 'API is healthy', data: { status: 'ok' } })
 })
 
-app.get('/api/docs', (req, res) => {
+app.get('/api/docs.json', (req, res) => {
   res.json(swaggerSpec)
+})
+
+app.get('/api/docs', (req, res) => {
+  res.type('html').send(`<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>LawShastra API Docs</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+  <script>
+    window.ui = SwaggerUIBundle({ url: '/api/docs.json', dom_id: '#swagger-ui', presets: [SwaggerUIBundle.presets.apis], layout: 'BaseLayout' });
+  </script>
+</body>
+</html>`)
 })
 
 app.use(`/api/${env.apiVersion}`, apiRoutes)
