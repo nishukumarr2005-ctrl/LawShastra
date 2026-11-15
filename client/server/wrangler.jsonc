@@ -9,7 +9,8 @@
   },
   "vars": {
     "API_VERSION": "v1",
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "CORS_ORIGIN": "https://law-shastra-j2og.vercel.app"
   },
   "d1_databases": [
     {
