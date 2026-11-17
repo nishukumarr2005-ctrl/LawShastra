@@ -15,6 +15,7 @@ import {
 import { DropdownMenu } from '@/components/ui/DropdownMenu'
 import { cn } from '@/utils/cn'
 import { adminActions, useAdminStore } from '@/features/admin/shared/adminStore'
+import { useAuth } from '@/features/admin/auth/AuthContext'
 
 export interface AdminHeaderProps {
   onMenuClick?: () => void
@@ -26,19 +27,31 @@ export interface AdminHeaderProps {
   className?: string
 }
 
+const FALLBACK_USER = {
+  name: 'Administrator',
+  email: 'lexsquora@gmail.com',
+  role: 'SUPER_ADMIN',
+}
+
+const prettyRole = (role?: string) =>
+  (role || 'USER')
+    .toLowerCase()
+    .split(/[_\s]+/)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ')
+
 export const AdminHeader: React.FC<AdminHeaderProps> = ({
   onMenuClick,
-  user = {
-    name: 'Adv. S. K. Sharma',
-    email: 'admin@lawshastra.in',
-    role: 'SUPER_ADMIN',
-  },
+  user,
   className,
 }) => {
   const navigate = useNavigate()
+  const { user: authUser, logout } = useAuth()
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [unreadCount] = useState(3)
   const { hydrating, syncError } = useAdminStore((s) => ({ hydrating: s.hydrating, syncError: s.syncError }))
+
+  const currentUser = user || (authUser ? { name: authUser.name, email: authUser.email, role: authUser.role } : FALLBACK_USER)
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode)
@@ -49,8 +62,9 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
     {
       label: (
         <div className="flex flex-col">
-          <span className="font-bold text-slate-900 dark:text-slate-100">{user.name}</span>
-          <span className="text-[10px] text-slate-400">{user.email}</span>
+          <span className="font-bold text-slate-900 dark:text-slate-100">{currentUser.name}</span>
+          <span className="text-[10px] text-slate-400">{currentUser.email}</span>
+          <span className="text-[10px] font-semibold text-amber-600 dark:text-amber-400">{prettyRole(currentUser.role)}</span>
         </div>
       ),
       disabled: true,
@@ -72,8 +86,7 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
       icon: <LogOut className="h-4 w-4" />,
       isDestructive: true,
       onClick: () => {
-        localStorage.removeItem('lawshastra_admin_user')
-        localStorage.removeItem('lawshastra_admin_token')
+        logout()
         navigate('/admin/login')
       },
     },
@@ -189,14 +202,14 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
               className="flex items-center gap-2 rounded-2xl border border-slate-200 p-1.5 pr-3 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/60 transition-colors"
             >
               <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 text-slate-950 font-black text-xs shadow-xs">
-                {user.name.charAt(0)}
+                {currentUser.name.charAt(0).toUpperCase()}
               </div>
               <div className="hidden sm:flex flex-col text-left">
                 <span className="text-xs font-bold text-slate-900 dark:text-slate-100 leading-none">
-                  {user.name}
+                  {currentUser.name}
                 </span>
                 <span className="text-[9px] font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider mt-0.5">
-                  {user.role}
+                  {prettyRole(currentUser.role)}
                 </span>
               </div>
             </button>

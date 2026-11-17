@@ -1,6 +1,7 @@
 import { sendSuccess } from '../../utils/response.js'
 import { getAllCategories } from '../../services/category.service.js'
 import { getAllLaws } from '../../services/law.service.js'
+import { listMenus } from '../../services/menu.service.js'
 import { cms } from '../../services/admin/cms.service.js'
 
 const toSlug = (v = '') =>
@@ -60,6 +61,7 @@ export const getPublicCatalog = async (req, res, next) => {
 export const getPublicCms = async (req, res, next) => {
   try {
     const data = cms.getAll()
+    const menus = await listMenus({ onlyVisible: true }).catch(() => [])
     const isPublished = (v) => String(v || '').toLowerCase() === 'published'
     const isActive = (v) => String(v || '').toLowerCase() === 'active'
 
@@ -67,7 +69,7 @@ export const getPublicCms = async (req, res, next) => {
       settings: data.settings || {},
       homepageBlocks: (data.homepageBlocks || []).filter((b) => b.enabled !== false).sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
       banners: (data.banners || []).filter((b) => isActive(b.status) || isPublished(b.status)),
-      menus: (data.menus || []).filter((m) => m.visible !== false).sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
+      menus,
       pages: (data.pages || []).filter((p) => isPublished(p.status)),
       articles: (data.articles || []).filter((a) => isPublished(a.status)),
       seoEntries: data.seoEntries || [],

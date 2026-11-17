@@ -1,6 +1,7 @@
 ﻿import { Router } from 'express'
 import { authenticate } from '../../middlewares/auth.js'
 import * as c from '../../controllers/admin/cms.controller.js'
+import * as menuController from '../../controllers/admin/menu.controller.js'
 
 const router = Router()
 router.use(authenticate)
@@ -22,7 +23,8 @@ crud('media', c.media)
 crud('tags', c.tags)
 crud('homepage-blocks', c.homepageBlocks)
 crud('banners', c.banners)
-crud('menus', c.menus)
+// Menus are backed by D1 (MenuItem table) so they persist across requests
+crud('menus', menuController)
 crud('visibility', c.visibilityRules)
 crud('seo', c.seoEntries)
 crud('feature-flags', c.featureFlags)

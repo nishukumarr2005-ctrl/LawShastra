@@ -9,41 +9,11 @@ export const loginUser = async ({ email, password }) => {
   }
 
   const cleanEmail = email.toLowerCase().trim()
-  let user = null
 
-  try {
-    user = await prisma.user.findUnique({
-      where: { email: cleanEmail },
-    })
-
-    // If user does not exist in DB yet, auto-provision default super admin for initial deployment
-    if (!user && (cleanEmail === 'admin@lawshastra.in' || cleanEmail === 'admin@lexquora.com')) {
-      const passwordHash = await hashPassword('admin123')
-      user = await prisma.user.create({
-        data: {
-          name: 'LawShastra Admin',
-          email: cleanEmail,
-          passwordHash,
-          role: ROLES.SUPER_ADMIN,
-          isActive: true,
-        },
-      })
-    }
-  } catch (dbErr) {
-    // If DB is offline/unreachable (e.g. testing without Postgres daemon), support default admin fallback
-    if (cleanEmail === 'admin@lawshastra.in' || cleanEmail === 'admin@lexquora.com') {
-      if (password === 'admin123') {
-        user = {
-          id: 1,
-          name: 'LawShastra Admin',
-          email: cleanEmail,
-          passwordHash: await hashPassword('admin123'),
-          role: ROLES.SUPER_ADMIN,
-          isActive: true,
-        }
-      }
-    }
-  }
+  // Strictly DB-backed authentication. Credentials must exist in the User table.
+  const user = await prisma.user.findUnique({
+    where: { email: cleanEmail },
+  })
 
   if (!user) {
     throw new Error('Invalid email or password')

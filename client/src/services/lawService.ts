@@ -70,6 +70,25 @@ export type PublicCatalog = {
   laws: Array<LawApiItem & { slug?: string }>
 }
 
+export type PublicMenu = {
+  id: number
+  label: string
+  path: string
+  location: string
+  visible: boolean
+  order: number
+}
+
+export type PublicCms = {
+  settings?: Record<string, unknown>
+  homepageBlocks?: unknown[]
+  banners?: unknown[]
+  menus?: PublicMenu[]
+  pages?: unknown[]
+  articles?: unknown[]
+  seoEntries?: unknown[]
+}
+
 export async function getLaws(): Promise<LawApiItem[]> {
   return apiRequest<LawApiItem[]>('/laws')
 }
@@ -88,6 +107,10 @@ export async function getCourses(): Promise<CourseApiItem[]> {
 
 export async function getPublicCatalog(): Promise<PublicCatalog> {
   return apiRequest<PublicCatalog>('/public/catalog')
+}
+
+export async function getPublicCms(): Promise<PublicCms> {
+  return apiRequest<PublicCms>('/public/cms')
 }
 
 export async function createLaw(payload: CreateLawPayload): Promise<LawApiItem> {

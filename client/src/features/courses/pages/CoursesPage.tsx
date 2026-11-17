@@ -513,7 +513,7 @@ export function CoursesPage() {
       `}</style>
 
       <div className="LexQuora-page">
-        <header className="topbar">
+        {/* <header className="topbar">
           <div className="brand">
             <div className="brand-mark">⚖</div>
             <div>
@@ -534,7 +534,7 @@ export function CoursesPage() {
             <div className="avatar">N</div>
             ⌄
           </div>
-        </header>
+        </header> */}
 
         <main className="wrap">
           <span className="eyebrow">⚖ &nbsp; LAW LIBRARY</span>

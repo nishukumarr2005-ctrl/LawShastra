@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { ArrowRight, BookMarked, CheckCircle2, Lock, ShieldCheck, Scale, AlertCircle } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Lock, ShieldCheck, Scale, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
 import { useAuth } from '@/features/admin/auth/AuthContext'
@@ -11,12 +11,15 @@ export function AdminLoginPage() {
   const location = useLocation()
   const { login } = useAuth()
 
-  const [email, setEmail] = useState('admin@lawshastra.in')
-  const [password, setPassword] = useState('admin123')
+  const [email, setEmail] = useState<string>()
+  const [password, setPassword] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/admin'
+  const from =
+    (location.state as { from?: { pathname: string } })?.from?.pathname ||
+    new URLSearchParams(location.search).get('redirect') ||
+    '/admin'
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -42,40 +45,20 @@ export function AdminLoginPage() {
         login(response.user, response.token)
         navigate(from, { replace: true })
       } else {
-        // Fallback demo admin
-        login({
-          id: 1,
-          name: 'LawShastra Super Admin',
-          email,
-          role: 'SUPER_ADMIN',
-          permissions: ['*'],
-        }, 'demo.jwt.token')
-        navigate(from, { replace: true })
+        setError('Login failed. Please verify your credentials.')
       }
     } catch (err: any) {
-      // In offline/mock mode with default credentials, allow access
-      if ((email === 'admin@lawshastra.in' || email === 'admin@lexquora.com') && password === 'admin123') {
-        login({
-          id: 1,
-          name: 'LawShastra Super Admin',
-          email,
-          role: 'SUPER_ADMIN',
-          permissions: ['*'],
-        }, 'demo.jwt.token')
-        navigate(from, { replace: true })
-      } else {
-        setError(err.message || 'Invalid email or password. Please verify your credentials.')
-      }
+      setError(err.message || 'Invalid email or password. Please verify your credentials.')
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const fillDemo = () => {
-    setEmail('admin@lawshastra.in')
-    setPassword('admin123')
-    setError(null)
-  }
+  // const fillDemo = () => {
+  //   setEmail()
+  //   setPassword('12345678')
+  //   setError(null)
+  // }
 
   return (
     <div className="min-h-screen bg-[#FFFDF8] text-[#25232B]">
@@ -89,7 +72,7 @@ export function AdminLoginPage() {
           <section className="max-w-xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-amber-300 bg-amber-50/60 px-3.5 py-1.5 text-[11px] font-black uppercase tracking-[0.2em] text-amber-800">
               <Scale className="h-3.5 w-3.5" />
-              LawShastra Admin CMS
+              LexQuora Admin CMS
             </div>
 
             <h1 className="mt-6 text-4xl font-black tracking-[-0.06em] text-slate-900 md:text-6xl">
@@ -199,7 +182,7 @@ export function AdminLoginPage() {
               </Button>
             </form>
 
-            <div className="mt-6 rounded-2xl border border-dashed border-amber-200 bg-amber-50/50 p-4">
+            {/* <div className="mt-6 rounded-2xl border border-dashed border-amber-200 bg-amber-50/50 p-4">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-100 text-amber-800">
@@ -218,7 +201,7 @@ export function AdminLoginPage() {
                   Auto Fill
                 </button>
               </div>
-            </div>
+            </div> */}
 
             <div className="mt-6 flex items-center justify-center gap-2 text-2xs text-slate-500">
               <Lock className="h-3.5 w-3.5 text-slate-400" />

@@ -1,5 +1,6 @@
 ﻿import { cms } from '../../services/admin/cms.service.js'
 import { sendSuccess, sendError } from '../../utils/response.js'
+import { listMenus } from '../../services/menu.service.js'
 
 const resource = (key, opts = {}) => ({
   list: (req, res) => sendSuccess(res, `${key} fetched`, cms.list(key)),
@@ -91,7 +92,14 @@ export const runMaintenance = (req, res) => {
   return sendSuccess(res, 'Maintenance run', item)
 }
 
-export const bootstrap = (req, res) => {
-  const data = cms.getAll()
-  return sendSuccess(res, 'CMS bootstrap fetched', data)
+export const bootstrap = async (req, res, next) => {
+  try {
+    const data = cms.getAll()
+    // Menus are D1-backed; merge them into the bootstrap payload so the
+    // admin Menus page reflects the persisted (D1) navigation items.
+    const menus = await listMenus().catch(() => data.menus || [])
+    return sendSuccess(res, 'CMS bootstrap fetched', { ...data, menus })
+  } catch (error) {
+    return next(error)
+  }
 }
